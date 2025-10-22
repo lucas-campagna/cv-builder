@@ -44,10 +44,12 @@ const App = () => {
   function handleChangeStyle() { }
 
   return (
-    <AppContext.Provider value={{ header, sections }}>
-      <Development onChangeContent={handleChangeContent} onChangeStyle={handleChangeStyle} />
-      <Document />
-    </AppContext.Provider>
+    <div className="bg-gray-700/50">
+      <AppContext.Provider value={{ header, sections }}>
+        <Development onChangeContent={handleChangeContent} onChangeStyle={handleChangeStyle} />
+        <Document />
+      </AppContext.Provider>
+    </div>
   );
 };
 
