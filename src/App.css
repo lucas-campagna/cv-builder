@@ -1,0 +1,66 @@
+/* General container styles */
+.cv-container {
+    max-width: 900px; /* or whatever width you prefer for the main document */
+    margin: 20px auto;
+    padding: 30px;
+    font-family: Arial, sans-serif; /* or your preferred font */
+    line-height: 1.5;
+}
+
+/* Header (Name and Contact) */
+.cv-header-name {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+.cv-header-contact {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Section Titles (EDUCATION, EXPERIENCE) */
+.cv-section-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #000; /* The prominent black line */
+    padding-bottom: 3px;
+    margin-bottom: 15px;
+}
+
+/* Entry Header (Job/Degree Title and Date) */
+.cv-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+.cv-entry-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+.cv-entry-date {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Bullet Points */
+.cv-bullet-list {
+    margin-top: 5px;
+    padding-left: 25px; /* Adjust for proper bullet indentation */
+}
+.cv-bullet-item {
+    list-style-type: disc;
+    margin-bottom: 4px;
+    font-size: 15px;
+}
+
+@media print {
+  .dev {
+    display: none;
+  }
+}
