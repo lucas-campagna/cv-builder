@@ -2,33 +2,42 @@ type TSection = {
   title: string;
   upperLeft?: string;
   upperRight?: string;
-  bottomLeft?: string;
-  bottomRight?: string;
+  lowerLeft?: string;
+  lowerRight?: string;
   summary?: string | string[];
 }
 
-const Section = ({ title, upperLeft, upperRight, bottomLeft, bottomRight, summary}: TSection) => (
-  <div className="mb-3">
-    <h2 className="text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1">
-      {title}
-    </h2>
-    <div className="mx-2">
-      <div className={'flex justify-between'}>
-        <span className="text-lg">{upperLeft}</span>
-        <span className="text-lg">{upperRight}</span>
+const Section = ({ title, upperLeft, upperRight, lowerLeft, lowerRight, summary }: TSection) => {
+  const hasUpper = upperLeft || upperRight;
+  const hasLower = lowerLeft || lowerRight;
+  return (
+    <div className="mb-3">
+      <h2 className="text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1">
+        {title}
+      </h2>
+      <div className="mx-2">
+        {
+          hasUpper &&
+          <div className={'flex justify-between'}>
+            <span className="text-lg">{upperLeft}</span>
+            <span className="text-lg">{upperRight}</span>
+          </div>
+        }
+        {
+          hasLower && <div className={'flex justify-between'}>
+            <span className="text-lg">{lowerLeft}</span>
+            <span className="text-md">{lowerRight}</span>
+          </div>
+        }
+        {summary && (
+          <p className="text-sm">
+            {!Array.isArray(summary) ? summary : summary.map((children, index) => <BulletPoint key={index} children={children} />)}
+          </p>
+        )}
       </div>
-      <div className={'flex justify-between'}>
-        <span className="text-lg">{bottomLeft}</span>
-        <span className="text-md">{bottomRight}</span>
-      </div>
-      {summary && (
-        <p className="text-sm italic">
-          {!Array.isArray(summary) ? summary : summary.map((children, i) => <BulletPoint key={i} children={children}/>)}
-        </p>
-      )}
     </div>
-  </div>
-);
+  )
+};
 
 /**
  * Renders a simple bullet point item as seen in the Experience section.

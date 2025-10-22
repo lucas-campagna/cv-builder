@@ -15,16 +15,17 @@ const sampleSections: TSection[] = [
     title: 'Experience',
     upperLeft: 'Software Engineer',
     upperRight: '2020 - Present',
-    bottomLeft: 'Tech Company',
-    bottomRight: 'San Francisco, CA',
+    lowerLeft: 'Tech Company',
+    lowerRight: 'San Francisco, CA',
     summary: ['Developed web applications using React and TypeScript', 'Collaborated with cross-functional teams to deliver projects on time']
   },
   {
     title: 'Education',
     upperLeft: 'Bachelor of Science in Computer Science',
     upperRight: '2016 - 2020',
-    bottomLeft: 'University of Example',
-    bottomRight: 'GPA: 3.8'
+    lowerLeft: 'University of Example',
+    lowerRight: 'GPA: 3.8',
+    summary: "Desenvolvi eetc"
   }
 ];
 
