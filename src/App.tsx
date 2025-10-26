@@ -31,22 +31,26 @@ const sampleSections: TSection[] = [
   }
 ];
 
+type TStyle = { [key: string]: string };
+
 export const AppContext = createContext({
   header: sampleHeader,
-  sections: sampleSections
+  sections: sampleSections,
+  style: {},
+  setHeader: (_: typeof sampleHeader) => { },
+  setSections: (_: typeof sampleSections) => { },
+  setStyle: (_: TStyle) => { },
 })
 
 const App = () => {
   const [header, setHeader] = useState<THeader>(sampleHeader);
   const [sections, setSections] = useState<TSection[]>(sampleSections);
-
-  function handleChangeContent() { }
-  function handleChangeStyle() { }
+  const [style, setStyle] = useState<TStyle>({});
 
   return (
-    <div className="bg-gray-700/50">
-      <AppContext.Provider value={{ header, sections }}>
-        <Development onChangeContent={handleChangeContent} onChangeStyle={handleChangeStyle} />
+    <div className="bg-gray-700/50 py-2">
+      <AppContext.Provider value={{ header, sections, style, setHeader, setSections, setStyle }}>
+        <Development />
         <Document />
       </AppContext.Provider>
     </div>
