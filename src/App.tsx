@@ -3,6 +3,7 @@ import Document from './components/Document';
 import Development from './components/Development';
 import type { THeader } from './components/Header';
 import type { TSection } from './components/Section';
+import DynamicComponentsProvider from './contexts/DynamicComponentsProvider';
 
 const sampleHeader: THeader = {
   name: 'John Doe',
@@ -49,10 +50,12 @@ const App = () => {
 
   return (
     <div className="bg-gray-700/50 py-2">
-      <AppContext.Provider value={{ header, sections, style, setHeader, setSections, setStyle }}>
-        <Development />
-        <Document />
-      </AppContext.Provider>
+      <DynamicComponentsProvider>
+        <AppContext.Provider value={{ header, sections, style, setHeader, setSections, setStyle }}>
+          <Development />
+          <Document />
+        </AppContext.Provider>
+      </DynamicComponentsProvider>
     </div>
   );
 };
