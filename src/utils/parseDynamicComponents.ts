@@ -32,9 +32,10 @@ function extractVars(obj: unknown): Set<string> {
 }
 
 function parseDynamicComponent(yamlString: string): ComponentBuilder {
-  const yamlData = yaml.load(yamlString) as Record<string, ComponentProperties>;
+  const yamlData = yaml.load(yamlString) as Record<string, ComponentProperties> | undefined;
   const listOfComponents: ComponentBuilder = {};
 
+  if (!yamlData) return {};
   // Parse in reverse order to handle dependencies (assuming dependents come before dependencies in YAML)
   const entries = Object.entries(yamlData).reverse();
 

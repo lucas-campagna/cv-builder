@@ -4,15 +4,15 @@ import { createContext, useState, type JSX } from "react";
 type TComponents = ComponentBuilder;
 type TDynamicComponents = {
   components: TComponents;
-  parse: (_: string) => void;
+  update: (_: string) => void;
 };
 
 const defaultDynamicComponents: TDynamicComponents = {
   components: {},
-  parse: (_: string) => { },
+  update: (_: string) => { },
 };
 
-const DynamicComponents = createContext(defaultDynamicComponents);
+export const DynamicComponents = createContext(defaultDynamicComponents);
 
 export default function DynamicComponentsProvider({
   children,
@@ -22,9 +22,9 @@ export default function DynamicComponentsProvider({
   const [components, setComponents] = useState(
     defaultDynamicComponents.components
   );
-  const parse = (code: string) => setComponents(parseDynamicComponent(code));
+  const update = (code: string) => code && setComponents(parseDynamicComponent(code));
   return (
-    <DynamicComponents.Provider value={{ components, parse }}>
+    <DynamicComponents.Provider value={{ components, update }}>
       {children}
     </DynamicComponents.Provider>
   );
