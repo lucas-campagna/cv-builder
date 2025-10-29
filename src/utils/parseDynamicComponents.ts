@@ -46,7 +46,7 @@ function parseBody(body: unknown, finalProps: Record<string, unknown>, listOfCom
         const hasSize = 'size' in childProps;
         const childColor = childFinalProps.color as string || '';
         const processedColor = hasSize ? childColor : childColor + (currentColor ? ' ' + currentColor : '');
-        const childProcessedClass = (finalProps.style as string).replace('$color', processedColor).replace('$size', childFinalProps.size as string || '');
+        const childProcessedClass = typeof finalProps.style === 'string' ? finalProps.style.replace('$color', processedColor).replace('$size', childFinalProps.size as string || '') : '';
         currentColor = childColor;
         const childChildren = parseBody(childBody, finalProps, listOfComponents);
         if (listOfComponents[childFrom]) {

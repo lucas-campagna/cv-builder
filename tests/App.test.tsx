@@ -516,12 +516,14 @@ test('template component with implicit from and list children', () => {
   const yaml = `
 $box:
   style: $color p-1 $size
+  body: "-> $text"
 box:
   - color: bg-red-100
   - color: bg-yellow-100
   - size: h-2
   - color: bg-green-100
     size: size-1
+  - text: test
 `;
   const components = parseDynamicComponent(yaml);
   const { container } = render(components.box({}));
@@ -530,6 +532,7 @@ box:
   expect(divs[1]).toHaveClass('bg-yellow-100 p-1');
   expect(divs[2]).toHaveClass('p-1 h-2');
   expect(divs[3]).toHaveClass('bg-green-100 p-1 size-1');
+  expect(divs[4]).toHaveTextContent('-> test');
 })
 
 
