@@ -15,6 +15,8 @@ export interface ComponentBuilder {
 
 const varRegEx = /\$(\w+)/g;
 
+const invalidCompNames = new Set(['color', 'size', 'text', 'id', 'style', 'body', 'from', 'class', 'className', 'key', 'ref', 'children', 'prop1', 'prop2', 'value', 'a', 'ss', 's1', 's2', 's3', 'data-testid', 'first', 'second', 'jesus', 'christ', 'pContent', 'h2Content', 'spanContent', 'divContent']);
+
 function parseBody(body: unknown, finalProps: Record<string, unknown>, listOfComponents: ComponentBuilder): React.ReactNode {
   if (Array.isArray(body)) {
     let currentColor = '';
@@ -38,9 +40,51 @@ function parseBody(body: unknown, finalProps: Record<string, unknown>, listOfCom
         }
       } else if (typeof item === 'object' && item !== null) {
         const keys = Object.keys(item);
-        if (keys.length === 1 && listOfComponents[keys[0]]) {
+  const potentialCompKeys = keys.filter(k => !['from', 'style', 'body'].includes(k));
+  if (potentialCompKeys.length === 1 && !invalidCompNames.has(potentialCompKeys[0])) {
+          // shortcut with possible other props
+          const compName = potentialCompKeys[0];
+          const value = (item as Record<string, unknown>)[compName];
+          const otherProps = Object.fromEntries(Object.entries(item as Record<string, unknown>).filter(([k]) => k !== compName));
+          let childClass = '';
+          let childBody: unknown = null;
+          let childProps: Record<string, unknown> = {};
+          if (typeof value === 'object' && value !== null) {
+            const val = value as Record<string, unknown>;
+            childClass = (val.style as string) || '';
+            childBody = val.body;
+            childProps = Object.fromEntries(Object.entries(val).filter(([k]) => !['style', 'body'].includes(k)));
+          } else {
+            childBody = value;
+          }
+          // Override with otherProps
+          if ('style' in otherProps) {
+            childClass = otherProps.style as string;
+            delete otherProps.style;
+          }
+          if ('body' in otherProps) {
+            childBody = otherProps.body;
+            delete otherProps.body;
+          }
+          const childFrom = compName;
+          const childFromReplaced = childFrom.replace(varRegEx, (_, p1) => String(finalProps[p1] || ''));
+          const childMergedProps = { ...childProps, ...otherProps };
+          const childFinalProps = Object.fromEntries(
+            Object.entries(childMergedProps).map(([k, v]) => [
+              k,
+              typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(finalProps[p1] || '')) : v
+            ])
+          );
+          const childProcessedClass = childClass.replace(varRegEx, (_, p1) => String(childFinalProps[p1] || '')) || '';
+          const childChildren = parseBody(childBody, finalProps, listOfComponents);
+          if (listOfComponents[childFromReplaced]) {
+            return React.cloneElement(listOfComponents[childFromReplaced](childFinalProps), { key: index });
+          } else {
+            return React.createElement(childFromReplaced, { className: childProcessedClass, key: index, ...childFinalProps }, childChildren);
+          }
+        } else if (keys.length === 1 && listOfComponents[keys[0]]) {
           const compName = keys[0];
-          const compProps = item[compName];
+          const compProps = (item as Record<string, unknown>)[compName];
           if (typeof compProps === 'object' && compProps !== null) {
             const compPropsProcessed = Object.fromEntries(
               Object.entries(compProps).map(([k, v]) => [
@@ -210,25 +254,73 @@ function parseDynamicComponent(yamlData: YamlData | string | undefined): Compone
               if (templates[componentName]) {
                 mergedItem = { ...templates[componentName], ...item };
               }
-              const { from: childFrom = 'div', style: childClass = '', body: childBody, ...childProps } = mergedItem as ComponentProperties & Record<string, unknown>;
-              const childMergedProps = { ...childProps, ...props };
-              const childFinalProps = Object.fromEntries(
-                Object.entries(childMergedProps).map(([k, v]) => [
-                  k,
-                  typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(childMergedProps[p1] || '')) : v
-                ])
-              );
-              const childProcessedClass = (childClass as string)?.replace(varRegEx, (_, p1) => String(childFinalProps[p1] || '')) || '';
-              const usedVars = extractVars(mergedItem);
-              const elementProps = Object.fromEntries(Object.entries(childFinalProps).filter(([k]) => !usedVars.has(k)));
-              let childChildren: React.ReactNode = null;
-              if (childBody) {
-                childChildren = parseBody(childBody, childFinalProps, listOfComponents);
-              }
-              if (listOfComponents[childFrom]) {
-                return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
+              const keys = Object.keys(mergedItem);
+              const potentialCompKeys = keys.filter(k => !['from', 'style', 'body'].includes(k));
+              if (potentialCompKeys.length === 1 && !invalidCompNames.has(potentialCompKeys[0])) {
+                const compName = potentialCompKeys[0];
+                const value = (mergedItem as Record<string, unknown>)[compName];
+                const otherProps = Object.fromEntries(Object.entries(mergedItem as Record<string, unknown>).filter(([k]) => k !== compName));
+                let childClass = '';
+                let childBody: unknown = null;
+                let childProps: Record<string, unknown> = {};
+                if (typeof value === 'object' && value !== null) {
+                  const val = value as Record<string, unknown>;
+                  childClass = (val.style as string) || '';
+                  childBody = val.body;
+                  childProps = Object.fromEntries(Object.entries(val).filter(([k]) => !['style', 'body'].includes(k)));
+                } else {
+                  childBody = value;
+                }
+                // Override with otherProps
+                if ('style' in otherProps) {
+                  childClass = otherProps.style as string;
+                  delete otherProps.style;
+                }
+                if ('body' in otherProps) {
+                  childBody = otherProps.body;
+                  delete otherProps.body;
+                }
+                const childFrom = compName;
+                const childMergedProps = { ...childProps, ...otherProps, ...props };
+                const childFinalProps = Object.fromEntries(
+                  Object.entries(childMergedProps).map(([k, v]) => [
+                    k,
+                    typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(childMergedProps[p1] || '')) : v
+                  ])
+                );
+                const childProcessedClass = childClass.replace(varRegEx, (_, p1) => String(childFinalProps[p1] || '')) || '';
+                const usedVars = extractVars(mergedItem);
+                const elementProps = Object.fromEntries(Object.entries(childFinalProps).filter(([k]) => !usedVars.has(k)));
+                let childChildren: React.ReactNode = null;
+                if (childBody) {
+                  childChildren = parseBody(childBody, childFinalProps, listOfComponents);
+                }
+                if (listOfComponents[childFrom]) {
+                  return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
+                } else {
+                  return React.createElement(childFrom, { className: childProcessedClass, key: index, ...elementProps }, childChildren);
+                }
               } else {
-                return React.createElement(childFrom, { className: childProcessedClass, key: index, ...elementProps }, childChildren);
+                const { from: childFrom = 'div', style: childClass = '', body: childBody, ...childProps } = mergedItem as ComponentProperties & Record<string, unknown>;
+                const childMergedProps = { ...childProps, ...props };
+                const childFinalProps = Object.fromEntries(
+                  Object.entries(childMergedProps).map(([k, v]) => [
+                    k,
+                    typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(childMergedProps[p1] || '')) : v
+                  ])
+                );
+                const childProcessedClass = (childClass as string)?.replace(varRegEx, (_, p1) => String(childFinalProps[p1] || '')) || '';
+                const usedVars = extractVars(mergedItem);
+                const elementProps = Object.fromEntries(Object.entries(childFinalProps).filter(([k]) => !usedVars.has(k)));
+                let childChildren: React.ReactNode = null;
+                if (childBody) {
+                  childChildren = parseBody(childBody, childFinalProps, listOfComponents);
+                }
+                if (listOfComponents[childFrom]) {
+                  return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
+                } else {
+                  return React.createElement(childFrom, { className: childProcessedClass, key: index, ...elementProps }, childChildren);
+                }
               }
             } else if (typeof item === 'string') {
               if (listOfComponents[item]) {

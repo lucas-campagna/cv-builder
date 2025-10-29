@@ -593,3 +593,96 @@ box:
   expect(flexDivs[1]).not.toHaveAttribute('prop1');
   expect(flexDivs[1]).not.toHaveAttribute('prop2');
 })
+
+test('shortcut for component reference in body array', () => {
+  const yaml = `
+box:
+  from: div
+  id: parent
+  body:
+    - div: first child
+    - div: second child
+    - p: third child
+    - h2: fourth child
+`;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({}));
+  expect(screen.getByText('first child')).toBeInTheDocument();
+  expect(screen.getByText('second child')).toBeInTheDocument();
+  expect(screen.getByText('third child')).toBeInTheDocument();
+  expect(screen.getByText('first child').parentElement?.id).toBe('parent');
+  expect(screen.getByText('second child').parentElement?.id).toBe('parent');
+  expect(screen.getByText('third child').parentElement?.id).toBe('parent');
+  expect(screen.getByText('third child').tagName).toBe('P');
+  expect(screen.getByText('fourth child').tagName).toBe('H2');
+});
+
+test('shortcut for component reference in body array with other properties', () => {
+  const yaml = `
+box:
+  - div:
+      body: unique child
+      style: text-red-500
+`;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({}));
+  const element = screen.getByText('unique child');
+  expect(element).toBeInTheDocument();
+  expect(element.tagName).toBe('DIV');
+  expect(element).toHaveClass('text-red-500');
+})
+
+test('shortcut for component reference in body array with other properties with implicit body', () => {
+  const yaml = `
+box:
+  - div: unique child
+    style: text-red-500
+`;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({}));
+  const element = screen.getByText('unique child');
+  expect(element).toBeInTheDocument();
+  expect(element.tagName).toBe('DIV');
+  expect(element).toHaveClass('text-red-500');
+})
+
+test('renders built-in HTML tags p, h2, span, and div with parameters and styles with implicit body', () => {
+  const yaml = `
+ box:
+   from: div
+   body:
+     - p: $pContent
+       style: text-red-500
+     - h2: $h2Content
+     - span: $spanContent
+       style: font-bold
+     - div: $divContent
+       style: bg-blue-100 p-2
+ `;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({
+    pContent: 'Paragraph text',
+    h2Content: 'Heading text',
+    spanContent: 'Span text',
+    divContent: 'Div text'
+  }));
+
+  // Check p tag with style
+  const pElement = screen.getByText('Paragraph text');
+  expect(pElement.tagName).toBe('P');
+  expect(pElement).toHaveClass('text-red-500');
+
+  // Check h2 tag
+  const h2Element = screen.getByText('Heading text');
+  expect(h2Element.tagName).toBe('H2');
+
+  // Check span tag with style
+  const spanElement = screen.getByText('Span text');
+  expect(spanElement.tagName).toBe('SPAN');
+  expect(spanElement).toHaveClass('font-bold');
+
+  // Check div tag with style
+  const divElement = screen.getByText('Div text');
+  expect(divElement.tagName).toBe('DIV');
+  expect(divElement).toHaveClass('bg-blue-100 p-2');
+});
