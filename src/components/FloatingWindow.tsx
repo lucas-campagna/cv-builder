@@ -42,12 +42,6 @@ const FloatingWindow: React.FC<FloatingWindowProps> = ({ isOpen = true, onClose,
     }
   }, [dragging, handleMouseMove, handleMouseUp]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose?.();
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
