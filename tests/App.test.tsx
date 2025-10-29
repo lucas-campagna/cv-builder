@@ -1,4 +1,3 @@
-import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import App from '../src/App';
@@ -288,7 +287,7 @@ box:
     - box2
 `;
   const components = parseDynamicComponent(yaml);
-  const { container } = render(components.box({}));
+  render(components.box({}));
   expect(screen.getByText('first child')).toBeInTheDocument();
   expect(screen.getByText('second child')).toBeInTheDocument();
   expect(screen.getByText('first child').parentElement?.id).toBe('parent');
