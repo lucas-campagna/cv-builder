@@ -401,20 +401,71 @@ box:
   const { container } = render(components.box({}));
   expect(container.querySelector('#target')).toHaveClass('bg-green-100 p-1 size-1');
 })
-//   const yaml = `
-// box:
-//   style: $color p-1 $size
-//
-// box:
-//   - color: bg-red-100
-//   - color: bg-yellow-100
-//   - color: bg-green-100
-//     size: size-1
-// `;
-//   const components = parseDynamicComponent(yaml);
-//   const { container } = render(components.box({}));
-//   const divs = container.querySelectorAll('div');
-//   expect(divs[0]).toHaveClass('bg-red-100 p-1');
-//   expect(divs[1]).toHaveClass('bg-yellow-100 bg-red-100');
-//   expect(divs[2]).toHaveClass('bg-green-100 p-1 size-1');
-// })
+
+test('template components with body replacement and explicit from', () => {
+  const yaml = `
+$box:
+  id: target
+  body:
+    - from: div
+      body: $first
+    - from: div
+      body: $second
+box:
+  first: jesus
+  second: christ
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelector('#target')).toBeInTheDocument();
+  const children = container.querySelector('#target')?.children;
+  expect(children).toHaveLength(2);
+  expect(children?.[0]).toHaveTextContent('jesus');
+  expect(children?.[1]).toHaveTextContent('christ');
+})
+
+test('template components with body replacement and implicit from', () => {
+  const yaml = `
+$box:
+  id: target
+  body:
+    - $first
+    - $second
+box:
+  first: jesus
+  second: christ
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelector('#target')).toBeInTheDocument();
+  const children = container.querySelector('#target')?.children;
+  expect(children).toHaveLength(2);
+  expect(children?.[0]).toHaveTextContent('jesus');
+  expect(children?.[1]).toHaveTextContent('christ');
+})
+
+test('template components with body replacement and implicit from and diferent formats', () => {
+  const yaml = `
+jesus:
+  style: bg-red-100
+  body: jesus
+christ:
+  style: bg-yellow-100
+  body: christ
+$box:
+  id: target
+  body:
+    - from: $first
+    - from: $second
+box:
+  first: jesus
+  second: christ
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelector('#target')).toBeInTheDocument();
+  const children = container.querySelector('#target')?.children;
+  expect(children).toHaveLength(2);
+   expect(children?.[0]).toHaveTextContent('jesus');
+   expect(children?.[1]).toHaveTextContent('christ');
+})
