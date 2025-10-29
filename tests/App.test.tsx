@@ -5,9 +5,9 @@ import App from '../src/App';
 import parseDynamicComponent from '../src/utils/parseDynamicComponents';
 
 test('renders App without crashing', () => {
-  render(<App />);
+  const { container } = render(<App />);
   // Check for the document container
-  expect(document.querySelector('.doc')).toBeInTheDocument();
+  expect(container.querySelector('.doc')).toBeInTheDocument();
 });
 
 test('converts YAML to component without variables', () => {
@@ -54,6 +54,23 @@ box:
   expect(screen.getByText('My Comp')).toHaveClass('bg-green-100');
 });
 
+test('converts YAML with component composition inverse order', () => {
+  const yaml = `
+box:
+  from: div
+  style: bg-green-100
+  body: $text
+
+my_comp:
+  from: box
+  text: My Comp
+`;
+  const components = parseDynamicComponent(yaml);
+  // Note: Current parser does not support composition; update to handle component references
+  render(components.my_comp({}));
+  expect(screen.getByText('My Comp')).toBeInTheDocument();
+  expect(screen.getByText('My Comp')).toHaveClass('bg-green-100');
+});
 
 test('testing deep inheritance', () => {
   const yaml = `
@@ -131,12 +148,40 @@ test('without style and body', () => {
   const yaml = `
 box:
   from: div
+  id: parent
+  body:
+    - from: div
+      body: first child
+    - from: div
+      body: second child
+    -
 `;
   const components = parseDynamicComponent(yaml);
   const { container } = render(components.box({}));
   expect(container.querySelector('div')).toBeInTheDocument();
+  expect(container.querySelector('#parent')?.children.length).toBe(2);
 })
 
+test('render list of children filter null', () => {
+  const yaml = `
+box:
+  from: div
+  id: parent
+  body:
+    - from: div
+      body: first child
+    - from: div
+      body: second child
+    -
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(screen.getByText('first child')).toBeInTheDocument();
+  expect(screen.getByText('second child')).toBeInTheDocument();
+  expect(screen.getByText('first child').parentElement?.id).toBe('parent');
+  expect(screen.getByText('second child').parentElement?.id).toBe('parent');
+  expect(container.querySelector('#parent')?.children.length).toBe(2);
+})
 
 test('render list of children', () => {
   const yaml = `
@@ -263,3 +308,101 @@ box:
   render(components.box({ s3: 'height-3' }));
   expect(screen.getByTestId('target')).toHaveClass('bg-red-100 width-2 height-3');
 })
+
+
+test('without style and body', () => {
+  const yaml = `
+box:
+  - from: div
+    body: first child
+  - from: div
+    body: second child
+  -
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelector('div')).toBeInTheDocument();
+  expect(screen.getByText('first child')?.parentElement?.children?.length)?.toBe(2);
+})
+
+test('handling null from field', () => {
+  const yaml = `
+box:
+  from:
+`;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({}));
+})
+
+test('multi level body with implicit from', () => {
+  const yaml = `
+box:
+  style: bg-red-100 p-1
+  body:
+    style: bg-yellow-100 p-1
+    body:
+      style: bg-green-100 p-1 size-1
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelectorAll('div')).toHaveLength(3);
+  expect(container.querySelector('.bg-red-100')).toHaveClass('bg-red-100 p-1');
+  expect(container.querySelector('.bg-yellow-100')).toHaveClass('bg-yellow-100 p-1');
+  expect(container.querySelector('.bg-green-100')).toHaveClass('bg-green-100 p-1 size-1');
+})
+
+test('implicit from array', () => {
+  const yaml = `
+box:
+  - style: bg-red-100 p-1
+  - style: bg-yellow-100 p-1
+  - style: bg-green-100 p-1 size-1
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelectorAll('div')).toHaveLength(3);
+  expect(container.querySelector('.bg-red-100')).toHaveClass('bg-red-100 p-1');
+  expect(container.querySelector('.bg-yellow-100')).toHaveClass('bg-yellow-100 p-1');
+  expect(container.querySelector('.bg-green-100')).toHaveClass('bg-green-100 p-1 size-1');
+})
+
+test('optional props', () => {
+  const yaml = `
+box1:
+  style: $a $b
+box:
+  - from: box1
+    a: bg-red-100
+  - from: box1
+    b: bg-blue-100
+  - from: box1
+    a: bg-red-100
+    b: bg-yellow-100
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelectorAll('div')).toHaveLength(3);
+  const divs = container.querySelectorAll('div');
+  expect(divs[0]).toHaveClass('bg-red-100');
+  expect(divs[1]).toHaveClass('bg-blue-100');
+  expect(divs[2]).toHaveClass('bg-red-100 bg-yellow-100');
+})
+
+// test('smart predefined component with implicit from', () => {
+//   const yaml = `
+// box:
+//   style: $color p-1 $size
+//
+// box:
+//   - color: bg-red-100
+//   - color: bg-yellow-100
+//   - color: bg-green-100
+//     size: size-1
+// `;
+//   const components = parseDynamicComponent(yaml);
+//   const { container } = render(components.box({}));
+//   const divs = container.querySelectorAll('div');
+//   expect(divs[0]).toHaveClass('bg-red-100 p-1');
+//   expect(divs[1]).toHaveClass('bg-yellow-100 bg-red-100');
+//   expect(divs[2]).toHaveClass('bg-green-100 p-1 size-1');
+// })

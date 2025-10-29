@@ -1,14 +1,14 @@
 import parseDynamicComponent, { type ComponentBuilder } from "@/utils/parseDynamicComponents";
 import { createContext, useState, type JSX } from "react";
 
-type TComponents = ComponentBuilder;
 type TDynamicComponents = {
-  components: TComponents;
+  Cv: () => JSX.Element;
   update: (_: string) => void;
 };
 
+const Cv = () => <>No CV</>;
 const defaultDynamicComponents: TDynamicComponents = {
-  components: {},
+  Cv,
   update: (_: string) => { },
 };
 
@@ -19,12 +19,27 @@ export default function DynamicComponentsProvider({
 }: {
   children: JSX.Element;
 }) {
-  const [components, setComponents] = useState(
-    defaultDynamicComponents.components
-  );
-  const update = (code: string) => code && setComponents(parseDynamicComponent(code));
+  const [components, setComponents] = useState<ComponentBuilder>({});
+  const [previousWorkingCv, setPreviousWorkingCv] = useState(() => <Cv />);
+  const update = (code: string) => {
+    console.log('Parsing', code);
+    if (!code) return;
+    try {
+      const newComponents = parseDynamicComponent(code) ?? {};
+      console.log('Parsed components', newComponents)
+      try {
+        const CvNew = newComponents.cv ?? Cv;
+        setPreviousWorkingCv(() => <CvNew />);
+      } catch {
+        newComponents.cv = Cv;
+      }
+      console.log('Updating new Components', code)
+      setComponents(newComponents);
+    } catch { }
+  };
+
   return (
-    <DynamicComponents.Provider value={{ components, update }}>
+    <DynamicComponents.Provider value={{ Cv: components.cv ?? Cv, update }}>
       {children}
     </DynamicComponents.Provider>
   );
