@@ -36,7 +36,7 @@ function parseBody(body: unknown, finalProps: Record<string, unknown>, listOfCom
         }
       } else if (typeof item === 'object' && item !== null) {
         const { from: childFrom = 'div', style: childClass = '', body: childBody, ...childProps } = item as ComponentProperties & Record<string, unknown>;
-        const childMergedProps = { ...finalProps, ...childProps };
+        const childMergedProps = { ...childProps };
         const childFinalProps = Object.fromEntries(
           Object.entries(childMergedProps).map(([k, v]) => [
             k,

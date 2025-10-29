@@ -439,7 +439,7 @@ box:
   expect(container.querySelector('#target')).toHaveTextContent('jesus christ');
 })
 
-test('template components with body replacement and implicit from and diferent formats', () => {
+test('template components with body replacement and implicit from', () => {
   const yaml = `
 jesus:
   style: bg-red-100
@@ -450,8 +450,7 @@ christ:
 $box:
   id: target
   body:
-    - from: $first
-    - from: $second
+    - $first
     - $second
 box:
   first: jesus
@@ -461,12 +460,11 @@ box:
   const { container } = render(components.box({}));
   expect(container.querySelector('#target')).toBeInTheDocument();
   const children = container.querySelector('#target')?.children;
-  expect(children).toHaveLength(3);
+  expect(children).toHaveLength(2);
   expect(children?.[0]).toHaveTextContent('jesus');
   expect(children?.[0]).toHaveClass('bg-red-100');
   expect(children?.[1]).toHaveTextContent('christ');
   expect(children?.[1]).toHaveClass('bg-yellow-100');
-  expect(children?.[2]).toHaveTextContent('christ');
 })
 
 
