@@ -37,24 +37,41 @@ function parseBody(body: unknown, finalProps: Record<string, unknown>, listOfCom
           return React.createElement(childFromReplaced, { className: childProcessedClass, key: index, ...childFinalProps }, childChildren);
         }
       } else if (typeof item === 'object' && item !== null) {
-        const { from: childFrom = 'div', style: childClass = '', body: childBody, ...childProps } = item as ComponentProperties & Record<string, unknown>;
-        const childMergedProps = { ...childProps };
-        const childFinalProps = Object.fromEntries(
-          Object.entries(childMergedProps).map(([k, v]) => [
-            k,
-            typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(finalProps[p1] || '')) : v
-          ])
-        );
-        const hasSize = 'size' in childProps;
-        const childColor = childFinalProps.color as string || '';
-        const processedColor = hasSize ? childColor : childColor + (currentColor ? ' ' + currentColor : '');
-        const childProcessedClass = typeof finalProps.style === 'string' ? finalProps.style.replace('$color', processedColor).replace('$size', childFinalProps.size as string || '') : '';
-        currentColor = childColor;
-        const childChildren = parseBody(childBody, finalProps, listOfComponents);
-        if (listOfComponents[childFrom]) {
-          return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
+        const keys = Object.keys(item);
+        if (keys.length === 1 && listOfComponents[keys[0]]) {
+          const compName = keys[0];
+          const compProps = item[compName];
+          if (typeof compProps === 'object' && compProps !== null) {
+            const compPropsProcessed = Object.fromEntries(
+              Object.entries(compProps).map(([k, v]) => [
+                k,
+                typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(finalProps[p1] || '')) : v
+              ])
+            );
+            return React.cloneElement(listOfComponents[compName](compPropsProcessed), { key: index });
+          } else {
+            return React.cloneElement(listOfComponents[compName]({}), { key: index });
+          }
         } else {
-          return React.createElement(childFrom, { className: childProcessedClass, key: index, ...childFinalProps }, childChildren);
+          const { from: childFrom = 'div', style: childClass = '', body: childBody, ...childProps } = item as ComponentProperties & Record<string, unknown>;
+          const childMergedProps = { ...childProps };
+          const childFinalProps = Object.fromEntries(
+            Object.entries(childMergedProps).map(([k, v]) => [
+              k,
+              typeof v === 'string' ? v.replace(varRegEx, (_, p1) => String(finalProps[p1] || '')) : v
+            ])
+          );
+          const hasSize = 'size' in childProps;
+          const childColor = childFinalProps.color as string || '';
+          const processedColor = hasSize ? childColor : childColor + (currentColor ? ' ' + currentColor : '');
+          const childProcessedClass = typeof finalProps.style === 'string' ? finalProps.style.replace('$color', processedColor).replace('$size', childFinalProps.size as string || '') : '';
+          currentColor = childColor;
+          const childChildren = parseBody(childBody, finalProps, listOfComponents);
+          if (listOfComponents[childFrom]) {
+            return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
+          } else {
+            return React.createElement(childFrom, { className: childProcessedClass, key: index, ...childFinalProps }, childChildren);
+          }
         }
       } else if (typeof item === 'string') {
         const replaced = item.replace(varRegEx, (_, p1) => String(finalProps[p1] || ''));

@@ -275,6 +275,31 @@ test('render list of multiple composable children with implicit from', () => {
   const yaml = `
 box1:
   from: div
+  body: $value
+box2:
+  from: div
+  body: $text
+box:
+  from: div
+  id: parent
+  body:
+    - box1:
+        value: first child
+    - box2:
+        text: second child
+`;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({}));
+  expect(screen.getByText('first child')).toBeInTheDocument();
+  expect(screen.getByText('second child')).toBeInTheDocument();
+  expect(screen.getByText('first child').parentElement?.id).toBe('parent');
+  expect(screen.getByText('second child').parentElement?.id).toBe('parent');
+})
+
+test('render list of multiple composable children with implicit from', () => {
+  const yaml = `
+box1:
+  from: div
   body: first child
 box2:
   from: div
