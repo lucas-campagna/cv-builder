@@ -533,6 +533,40 @@ box:
   expect(divs[2]).toHaveClass('p-1 h-2');
   expect(divs[3]).toHaveClass('bg-green-100 p-1 size-1');
   expect(divs[4]).toHaveTextContent('-> test');
+  console.debug(container.outerHTML)
 })
 
+test('template component with list implicit', () => {
+  const yaml = `
+$box:
+  from: div
+  style: flex justify-between
+  body:
+   - $prop1
+   - $prop2
 
+box:
+  - prop1: CompanyA
+    prop2: 2024-2025
+  - prop1: CompanyB
+    prop2: 2023-2024
+ `;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  const flexDivs = container.querySelectorAll('.flex.justify-between');
+  expect(flexDivs).toHaveLength(2);
+  expect(flexDivs[0]).toHaveTextContent('CompanyA2024-2025');
+  expect(flexDivs[1]).toHaveTextContent('CompanyB2023-2024');
+  expect(flexDivs[0].children).toHaveLength(2);
+  expect(flexDivs[1].children).toHaveLength(2);
+  // Check individual children
+  expect(flexDivs[0].children[0]).toHaveTextContent('CompanyA');
+  expect(flexDivs[0].children[1]).toHaveTextContent('2024-2025');
+  expect(flexDivs[1].children[0]).toHaveTextContent('CompanyB');
+  expect(flexDivs[1].children[1]).toHaveTextContent('2023-2024');
+  // Check props on parent
+  expect(flexDivs[0]).toHaveAttribute('prop1', 'CompanyA');
+  expect(flexDivs[0]).toHaveAttribute('prop2', '2024-2025');
+  expect(flexDivs[1]).toHaveAttribute('prop1', 'CompanyB');
+  expect(flexDivs[1]).toHaveAttribute('prop2', '2023-2024');
+})
