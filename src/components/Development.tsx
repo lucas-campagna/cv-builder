@@ -6,6 +6,7 @@ import useDynamicComponents from "@/hooks/useDynamicComponents";
 import { Bug } from "lucide-react";
 import Toggle from "./Toggle";
 import useAppState from "@/hooks/useAppState";
+import type { YamlData } from "@/utils/parseDynamicComponents";
 
 const floatingStyle = {
   ...A4,
@@ -13,14 +14,13 @@ const floatingStyle = {
 }
 
 const Development = () => {
-  const [content, setContent] = useState('');
-  const [structure, setStructure] = useState('');
+  const [content, setContent] = useState<YamlData>({});
+  const [structure, setStructure] = useState<YamlData>({});
   const { update } = useDynamicComponents();
   const { toggleDebug } = useAppState();
 
   useEffect(() => {
-    const code = `${structure}\n${content}`;
-    update(code);
+    update({ ...structure, ...content });
   }, [content, structure]);
 
   return (

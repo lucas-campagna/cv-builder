@@ -1,15 +1,15 @@
-import parseDynamicComponent from "@/utils/parseDynamicComponents";
+import parseDynamicComponent, { type YamlData } from "@/utils/parseDynamicComponents";
 import React, { createContext, useCallback, useState, Component } from "react";
 
 type TDynamicComponents = {
   Cv: React.FC;
-  update: (_: string) => void;
+  update: (_: YamlData) => void;
 };
 
 const Cv: React.FC = () => <>No CV</>;
 const defaultDynamicComponents: TDynamicComponents = {
   Cv,
-  update: (_: string) => { },
+  update: (_: YamlData) => { },
 };
 
 class ErrorBoundary extends Component<{ fallback: React.FC; children: React.ReactNode }, { hasError: boolean }> {
@@ -43,11 +43,10 @@ export default function DynamicComponentsProvider({
 }) {
   const [currentCv, setCurrentCv] = useState<React.FC>(() => Cv);
   const [previousWorkingCv, setPreviousWorkingCv] = useState<React.FC>(() => Cv);
-  const update = useCallback((code: string) => {
-    if (!code) return;
+  const update = useCallback((yamlData: YamlData) => {
     setPreviousWorkingCv(() => currentCv);
     try {
-      const newComponents = parseDynamicComponent(code) ?? {};
+      const newComponents = parseDynamicComponent(yamlData) ?? {};
       const newCv = (newComponents.cv ?? Cv) as React.FC;
       setCurrentCv(() => () => React.createElement(ErrorBoundary, { fallback: previousWorkingCv, children: React.createElement(newCv) }));
     } catch {
