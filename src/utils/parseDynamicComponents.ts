@@ -197,15 +197,17 @@ function parseDynamicComponent(yamlString: string): ComponentBuilder {
                   ])
                 );
                 const childProcessedClass = (childClass as string)?.replace(varRegEx, (_, p1) => String(childFinalProps[p1] || '')) || '';
+                const usedVars = extractVars(mergedItem);
+                const elementProps = Object.fromEntries(Object.entries(childFinalProps).filter(([k]) => !usedVars.has(k)));
                 let childChildren: React.ReactNode = null;
                 if (childBody) {
                   childChildren = parseBody(childBody, childFinalProps, listOfComponents);
                 }
-               if (listOfComponents[childFrom]) {
-                 return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
-               } else {
-                 return React.createElement(childFrom, { className: childProcessedClass, key: index, ...childFinalProps }, childChildren);
-               }
+                if (listOfComponents[childFrom]) {
+                  return React.cloneElement(listOfComponents[childFrom](childFinalProps), { key: index });
+                } else {
+                  return React.createElement(childFrom, { className: childProcessedClass, key: index, ...elementProps }, childChildren);
+                }
              } else if (typeof item === 'string') {
                if (listOfComponents[item]) {
                  return React.cloneElement(listOfComponents[item](props), { key: index });

@@ -533,7 +533,6 @@ box:
   expect(divs[2]).toHaveClass('p-1 h-2');
   expect(divs[3]).toHaveClass('bg-green-100 p-1 size-1');
   expect(divs[4]).toHaveTextContent('-> test');
-  console.debug(container.outerHTML)
 })
 
 test('template component with list implicit', () => {
@@ -564,9 +563,9 @@ box:
   expect(flexDivs[0].children[1]).toHaveTextContent('2024-2025');
   expect(flexDivs[1].children[0]).toHaveTextContent('CompanyB');
   expect(flexDivs[1].children[1]).toHaveTextContent('2023-2024');
-  // Check props on parent
-  expect(flexDivs[0]).toHaveAttribute('prop1', 'CompanyA');
-  expect(flexDivs[0]).toHaveAttribute('prop2', '2024-2025');
-  expect(flexDivs[1]).toHaveAttribute('prop1', 'CompanyB');
-  expect(flexDivs[1]).toHaveAttribute('prop2', '2023-2024');
+  // Check no extra props on parent
+  expect(flexDivs[0]).not.toHaveAttribute('prop1');
+  expect(flexDivs[0]).not.toHaveAttribute('prop2');
+  expect(flexDivs[1]).not.toHaveAttribute('prop1');
+  expect(flexDivs[1]).not.toHaveAttribute('prop2');
 })
