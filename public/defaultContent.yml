@@ -1,0 +1,110 @@
+$headline:
+  style: flex flex-col items-center
+  body:
+    - h1: $name
+      style: text-2xl
+    - div: $contacts
+
+headline:
+  name: Lucas Prett Campagna
+  contacts:
+    - phone +55 24 99835 7733
+    - email lucaspcampagna@gmail.com
+
+row:
+  style: flex justify-between
+  body:
+    - $left
+    - $right
+
+bulletPoint:
+  from: li
+  style: list-disc ml-5 my-1 text-base
+
+section:
+  body:
+    - from: h2
+      style: text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1
+      body: $title
+
+$experiences:
+  body:
+    - from: row
+      left: $company
+      right: $type
+    - from: row
+      left: $position
+      right: $date
+    - from: p
+      body: $description
+
+experience:
+  body:
+    - from: section
+      title: Experience
+    - from: div
+      style: px-2
+      body:
+        - experiences
+
+education:
+  body:
+    - from: section
+      title: Education
+    - from: div
+      style: px-2
+      body:
+        - educations
+
+$educations:
+  body:
+    - from: row
+      left: $college
+      right: $date
+    - from: row
+      left: $course
+      right: $gpa
+    - from: p
+      body: $description
+
+educations:
+  - college: Fluminense Federal University
+    date: 2017-2019
+    course: M.S. Computational Physics
+    gpa: 8.9
+    description: asdasd
+
+      
+  - college: Fluminense Federal University
+    date: 2013-2017
+    course: B.E. Computational Physics
+    gpa: 8.9
+    description: '
+asddsa
+asdasd
+'
+
+experiences:
+  - company: HP
+    date: 2020-2023
+    position: Sofware Developer
+    type: Remote
+    description: '
+asddsa
+asdasd
+'
+  - company: HP
+    date: 2020-2023
+    position: Sofware Developer
+    type: Remote
+    description: '
+asddsa
+asdasd
+'
+
+
+cv:
+  - headline
+  - experience
+  - education
+
