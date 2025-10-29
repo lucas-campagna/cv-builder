@@ -2,7 +2,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { memo } from "react";
 
-type Editor = React.ComponentProps<"textarea"> & {
+type Editor = Omit<React.ComponentProps<"textarea">, 'onChange'> & {
   onChange: (text: string) => void;
   title?: string;
 }
