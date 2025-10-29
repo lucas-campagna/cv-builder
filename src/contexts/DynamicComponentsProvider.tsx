@@ -1,5 +1,5 @@
 import parseDynamicComponent, { type ComponentBuilder } from "@/utils/parseDynamicComponents";
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 
 type TDynamicComponents = {
   Cv: () => React.ReactNode;
@@ -21,7 +21,7 @@ export default function DynamicComponentsProvider({
 }) {
   const [components, setComponents] = useState<ComponentBuilder>({});
   const [previousWorkingCv, setPreviousWorkingCv] = useState(() => <Cv />);
-  const update = (code: string) => {
+  const update = useCallback((code: string) => {
     if (!code) return;
     try {
       const newComponents = parseDynamicComponent(code) ?? {};
@@ -33,7 +33,7 @@ export default function DynamicComponentsProvider({
       }
       setComponents(newComponents);
     } catch { }
-  };
+  }, []);
 
   return (
     <DynamicComponents.Provider value={{ Cv: components.cv ?? Cv, update }}>
