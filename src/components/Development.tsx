@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react";
-import { Textarea } from "./ui/textarea";
+import { useEffect, useState, type JSX } from "react";
 import { A4 } from "@/constants";
-import createComponentBuilder from "@/utils/createComponentBuilder";
-import { createElement } from 'react';
-(window as any).createElement = createElement
+import Editor from "./Editor";
+import { cn } from "@/lib/utils";
+import useDynamicComponents from "@/hooks/useDynamicComponents";
 
 const floatingStyle = {
   ...A4,
@@ -11,27 +10,33 @@ const floatingStyle = {
 }
 
 const Development = () => {
-  const [style, setStyle] = useState('');
-  const Box = useMemo(() => createComponentBuilder(`
-Box:
-  from: div
-  class: bg-red-100 size-[20px]
-  body: test
+  const [content, setContent] = useState('');
+  const [structure, setStructure] = useState('');
+  const { update } = useDynamicComponents();
 
-`), []);
-  console.log(Box);
+  useEffect(() => {
+    const code = `${structure}\n${content}`;
+    update(code);
+  }, [content, structure]);
+
   return (
-    <div>
-      <div className="fixed px-2" style={floatingStyle}>
-        <Textarea className="bg-white" />
-      </div>
-      <div className="fixed px-2 right-0" style={floatingStyle}>
-        <Textarea className="bg-white" onChange={(e) => setStyle(e.target.value)} value={style} />
-      </div>
-      <Box />
-    </div>
+    <>
+      <LateralElement>
+        <Editor onChange={setContent} title="content" />
+      </LateralElement>
+      <LateralElement side='right'>
+        <Editor onChange={setStructure} title="structure" />
+      </LateralElement>
+    </>
   );
 };
+
+const LateralElement = ({ children, side = 'left' }: { children: JSX.Element, side?: 'left' | 'right' }) => (
+  < div className={cn(side === 'right' ? "right-0" : "", "fixed px-2")} style={floatingStyle} >
+    {children}
+  </div >
+)
+
 export default Development;
 
 
