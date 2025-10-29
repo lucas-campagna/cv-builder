@@ -388,7 +388,19 @@ box:
   expect(divs[2]).toHaveClass('bg-red-100 bg-yellow-100');
 })
 
-// test('smart predefined component with implicit from', () => {
+test('template components with implicit from', () => {
+  const yaml = `
+$box:
+  id: target
+  style: $color p-1 $size
+box:
+  color: bg-green-100
+  size: size-1
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(container.querySelector('#target')).toHaveClass('bg-green-100 p-1 size-1');
+})
 //   const yaml = `
 // box:
 //   style: $color p-1 $size
