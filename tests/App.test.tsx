@@ -221,7 +221,7 @@ box:
   expect(screen.getByText('third child')).toBeInTheDocument();
   expect(screen.getByText('first child').parentElement?.id).toBe('parent');
   expect(screen.getByText('second child').parentElement?.id).toBe('parent');
-  expect(screen.getByText('third child')?.id).toBe('parent');
+  expect(screen.getByText('third child').parentElement?.id).toBe('parent');
 })
 
 test('render list of composable children', () => {
@@ -424,13 +424,11 @@ box:
   expect(children?.[1]).toHaveTextContent('christ');
 })
 
-test('template components with body replacement and implicit from', () => {
+test('template components with body replacement', () => {
   const yaml = `
 $box:
   id: target
-  body:
-    - $first
-    - $second
+  body: $first $second
 box:
   first: jesus
   second: christ
@@ -438,10 +436,7 @@ box:
   const components = parseDynamicComponent(yaml);
   const { container } = render(components.box({}));
   expect(container.querySelector('#target')).toBeInTheDocument();
-  const children = container.querySelector('#target')?.children;
-  expect(children).toHaveLength(2);
-  expect(children?.[0]).toHaveTextContent('jesus');
-  expect(children?.[1]).toHaveTextContent('christ');
+  expect(container.querySelector('#target')).toHaveTextContent('jesus christ');
 })
 
 test('template components with body replacement and implicit from and diferent formats', () => {
@@ -457,6 +452,7 @@ $box:
   body:
     - from: $first
     - from: $second
+    - $second
 box:
   first: jesus
   second: christ
@@ -465,7 +461,10 @@ box:
   const { container } = render(components.box({}));
   expect(container.querySelector('#target')).toBeInTheDocument();
   const children = container.querySelector('#target')?.children;
-  expect(children).toHaveLength(2);
-   expect(children?.[0]).toHaveTextContent('jesus');
-   expect(children?.[1]).toHaveTextContent('christ');
+  expect(children).toHaveLength(3);
+  expect(children?.[0]).toHaveTextContent('jesus');
+  expect(children?.[0]).toHaveClass('bg-red-100');
+  expect(children?.[1]).toHaveTextContent('christ');
+  expect(children?.[1]).toHaveClass('bg-yellow-100');
+  expect(children?.[2]).toHaveTextContent('christ');
 })

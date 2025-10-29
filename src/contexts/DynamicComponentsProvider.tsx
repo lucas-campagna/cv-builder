@@ -22,18 +22,15 @@ export default function DynamicComponentsProvider({
   const [components, setComponents] = useState<ComponentBuilder>({});
   const [previousWorkingCv, setPreviousWorkingCv] = useState(() => <Cv />);
   const update = (code: string) => {
-    console.log('Parsing', code);
     if (!code) return;
     try {
       const newComponents = parseDynamicComponent(code) ?? {};
-      console.log('Parsed components', newComponents)
       try {
         const CvNew = newComponents.cv ?? Cv;
         setPreviousWorkingCv(() => <CvNew />);
       } catch {
         newComponents.cv = Cv;
       }
-      console.log('Updating new Components', code)
       setComponents(newComponents);
     } catch { }
   };
