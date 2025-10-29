@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useState } from "react";
 import { A4 } from "@/constants";
 import Editor from "./Editor";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ const Development = () => {
   );
 };
 
-const LateralElement = ({ children, side = 'left' }: { children: JSX.Element, side?: 'left' | 'right' }) => (
+const LateralElement = ({ children, side = 'left' }: { children: React.ReactNode, side?: 'left' | 'right' }) => (
   < div className={cn(side === 'right' ? "right-0" : "", "fixed px-2")} style={floatingStyle} >
     {children}
   </div >

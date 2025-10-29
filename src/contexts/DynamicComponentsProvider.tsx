@@ -1,8 +1,8 @@
 import parseDynamicComponent, { type ComponentBuilder } from "@/utils/parseDynamicComponents";
-import { createContext, useState, type JSX } from "react";
+import { createContext, useState } from "react";
 
 type TDynamicComponents = {
-  Cv: () => JSX.Element;
+  Cv: () => React.ReactNode;
   update: (_: string) => void;
 };
 
@@ -17,7 +17,7 @@ export const DynamicComponents = createContext(defaultDynamicComponents);
 export default function DynamicComponentsProvider({
   children,
 }: {
-  children: JSX.Element;
+  children: React.ReactNode;
 }) {
   const [components, setComponents] = useState<ComponentBuilder>({});
   const [previousWorkingCv, setPreviousWorkingCv] = useState(() => <Cv />);
