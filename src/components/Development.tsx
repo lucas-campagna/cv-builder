@@ -3,6 +3,9 @@ import { A4 } from "@/constants";
 import Editor from "./Editor";
 import { cn } from "@/lib/utils";
 import useDynamicComponents from "@/hooks/useDynamicComponents";
+import { Bug } from "lucide-react";
+import Toggle from "./Toggle";
+import useAppState from "@/hooks/useAppState";
 
 const floatingStyle = {
   ...A4,
@@ -13,6 +16,7 @@ const Development = () => {
   const [content, setContent] = useState('');
   const [structure, setStructure] = useState('');
   const { update } = useDynamicComponents();
+  const { toggleDebug } = useAppState();
 
   useEffect(() => {
     const code = `${structure}\n${content}`;
@@ -22,6 +26,9 @@ const Development = () => {
   return (
     <>
       <LateralElement>
+        <div className="p-1 mb-1 bg-white">
+          <Toggle onToggle={toggleDebug}><Bug /></Toggle>
+        </div>
         <Editor onChange={setContent} title="content" />
       </LateralElement>
       <LateralElement side='right'>
