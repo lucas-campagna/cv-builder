@@ -272,6 +272,28 @@ box:
   expect(screen.getByText('second child').parentElement?.id).toBe('parent');
 })
 
+test('render list of multiple composable children with implicit from', () => {
+  const yaml = `
+box1:
+  from: div
+  body: first child
+box2:
+  from: div
+  body: second child
+box:
+  from: div
+  id: parent
+  body:
+    - box1
+    - box2
+`;
+  const components = parseDynamicComponent(yaml);
+  const { container } = render(components.box({}));
+  expect(screen.getByText('first child')).toBeInTheDocument();
+  expect(screen.getByText('second child')).toBeInTheDocument();
+  expect(screen.getByText('first child').parentElement?.id).toBe('parent');
+  expect(screen.getByText('second child').parentElement?.id).toBe('parent');
+})
 
 test('render composable children', () => {
   const yaml = `
@@ -364,6 +386,28 @@ box:
   expect(container.querySelector('.bg-red-100')).toHaveClass('bg-red-100 p-1');
   expect(container.querySelector('.bg-yellow-100')).toHaveClass('bg-yellow-100 p-1');
   expect(container.querySelector('.bg-green-100')).toHaveClass('bg-green-100 p-1 size-1');
+})
+
+test('render list of multiple composable children with implicit from and no body', () => {
+  const yaml = `
+box1:
+  from: div
+  id: first
+  body: first child
+box2:
+  from: div
+  id: second
+  body: second child
+box:
+  - box1
+  - box2
+`;
+  const components = parseDynamicComponent(yaml);
+  render(components.box({}));
+  expect(screen.getByText('first child')).toBeInTheDocument();
+  expect(screen.getByText('second child')).toBeInTheDocument();
+  expect(screen.getByText('first child')?.id).toBe('first');
+  expect(screen.getByText('second child')?.id).toBe('second');
 })
 
 test('optional props', () => {
