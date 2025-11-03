@@ -1,15 +1,3 @@
-$headline:
-  style: flex flex-col items-center
-  body:
-    - h1: $name
-      style: text-2xl
-    - div: $contacts
-
-headline:
-  name: Lucas Prett Campagna
-  contacts:
-    - phone +55 24 99835 7733
-    - email lucaspcampagna@gmail.com
 
 row:
   style: flex justify-between
@@ -22,10 +10,9 @@ bulletPoint:
   style: list-disc ml-5 my-1 text-base
 
 section:
-  body:
-    - from: h2
-      style: text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1
-      body: $title
+  from: h2
+  style: text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1
+  body: $title
 
 $experiences:
   body:
@@ -37,6 +24,20 @@ $experiences:
       right: $date
     - from: p
       body: $description
+
+
+$headline:
+  style: flex flex-col items-center pb-3
+  body:
+    - h1: $name
+      style: text-2xl
+    - from: div
+      style: flex gap-2 text-xs pt-1
+      body:
+      - div: $email
+      - div: $phone
+      - div: $github
+      - div: $linkedin
 
 experience:
   body:
@@ -66,6 +67,13 @@ $educations:
       right: $gpa
     - from: p
       body: $description
+
+headline:
+  name: Lucas Prett Campagna
+  phone: +55 24 99835 7733
+  email: lucaspcampagna@gmail.com
+  github: github.com/lucas-campagna
+  linkedin: linkedin.com/in/lucas-prett-campagna
 
 educations:
   - college: Fluminense Federal University
@@ -107,4 +115,5 @@ cv:
   - headline
   - experience
   - education
+
 
