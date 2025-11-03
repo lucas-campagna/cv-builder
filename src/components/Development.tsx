@@ -39,7 +39,7 @@ const Development = () => {
 };
 
 const LateralElement = ({ children, side = 'left' }: { children: React.ReactNode, side?: 'left' | 'right' }) => (
-  < div className={cn(side === 'right' ? "right-0" : "", "fixed px-2")} style={floatingStyle} >
+  < div className={cn(side === 'right' ? "right-0" : "", "fixed px-2 bottom-0 top-0")} style={floatingStyle} >
     {children}
   </div >
 )
