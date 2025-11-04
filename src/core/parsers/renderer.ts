@@ -7,7 +7,10 @@ const render = ({
   body,
   ...props
 }: ComponentProps): React.ReactNode => {
-  const hasAnyProp = !!from || !!style || Object.keys(props).length > 0;
+  const hasAnyProp =
+    !!from ||
+    !!style ||
+    Object.keys(props).filter((p) => p !== "key").length > 0;
   if (!hasAnyProp && typeof body !== "object") {
     return body as React.ReactNode;
   }
@@ -22,8 +25,12 @@ const render = ({
     typeof body === "object"
       ? (Array.isArray(body) ? body : [body])
           .filter(Boolean)
-          .map((body: any) =>
-            render(typeof body === "object" ? body : { body })
+          .map((body: any, index: number) =>
+            render(
+              typeof body === "object"
+                ? { ...body, key: index }
+                : { body, key: index }
+            )
           )
       : (body as React.ReactNode);
   return createElement(type, properties, children);
