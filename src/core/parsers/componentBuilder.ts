@@ -8,9 +8,9 @@ import { normalizeAll } from "./normalizer";
 const build = (
   name: string,
   components: SetOfComponents = {}
-): ((_: PropsType) => string | ComponentProps) => {
+): ((_: PropsType) => ComponentProps) => {
   const normalizedComponents = normalizeAll(components);
-  let target: string | ComponentProps = normalizedComponents[name];
+  let target: ComponentProps = normalizedComponents[name];
   if (!target) {
     return () => ({});
   }

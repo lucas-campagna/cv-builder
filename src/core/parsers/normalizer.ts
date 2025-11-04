@@ -32,12 +32,20 @@ export const normalize = (
     const from = Object.keys(target).find(
       (key) => isComponent(key) || isHtmlTag(key)
     );
-    const parsedTarget = { ...target };
     if (from) {
-      parsedTarget.body = normalize(parsedTarget[from], parsedComponents);
+      const parsedTarget = {
+        ...target,
+        ...(typeof target[from] === "object"
+          ? target[from]
+          : { body: target[from] }),
+      };
+      const parsedBody = normalize(target[from], parsedComponents);
+      parsedTarget.body = parsedBody?.body ?? parsedBody;
       parsedTarget.from = from;
+      delete parsedTarget[from];
+      return parsedTarget;
     }
-    return parsedTarget;
+    return target;
   }
   return { body: target };
 };

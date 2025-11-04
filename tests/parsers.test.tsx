@@ -515,11 +515,11 @@ test("template components with body replacement as string", () => {
 test("template components with body replacement and implicit from", () => {
   const jesus = {
     style: "bg-red-100",
-    body: "jesus",
+    body: "Jesus",
   };
   const christ = {
     style: "bg-yellow-100",
-    body: "christ",
+    body: "Christ",
   };
   const $box = {
     id: "target",
@@ -536,11 +536,11 @@ test("template components with body replacement and implicit from", () => {
     body: [
       {
         style: "bg-red-100",
-        body: "jesus",
+        body: "Jesus",
       },
       {
         style: "bg-yellow-100",
-        body: "christ",
+        body: "Christ",
       },
     ],
   });
@@ -558,7 +558,7 @@ test("template component with implicit from and list children", () => {
     { color: "bg-green-100", size: "size-1" },
     { text: "test" },
   ];
-  const components = normalizeAll({ box, $box });
+  const components = normalizeAll({ box, $box } as any);
   const boxParsed = parseTemplate("box", components);
   expect(boxParsed).toEqual({
     body: [
@@ -593,18 +593,18 @@ box:
       {
         from: "div",
         style: "flex justify-between",
-        body: ["CompanyA", "2024-2025"],
+        body: [{ body: "CompanyA" }, { body: "2024-2025" }],
       },
       {
         from: "div",
         style: "flex justify-between",
-        body: ["CompanyB", "2023-2024"],
+        body: [{ body: "CompanyB" }, { body: "2023-2024" }],
       },
     ],
   });
 });
 
-test("shortcut for component reference in body array", () => {
+test("shortcut for component reference in body array 1", () => {
   const yaml = `
 box:
   from: div
@@ -616,8 +616,7 @@ box:
     - h2: fourth child
 `;
   const components = normalizeAll(parseYaml(yaml)!);
-  const boxParsed = parseBody(components!["box"], components!);
-  expect(boxParsed).toEqual({
+  expect(components!["box"]).toEqual({
     from: "div",
     id: "parent",
     body: [
@@ -625,6 +624,117 @@ box:
       { from: "div", body: "second child" },
       { from: "p", body: "third child" },
       { from: "h2", body: "fourth child" },
+    ],
+  });
+});
+
+test("shortcut for component reference in body array with other properties", () => {
+  const yaml = `
+box:
+  - div:
+      body: unique child
+      style: text-red-500
+`;
+  const components = normalizeAll(parseYaml(yaml)!);
+  expect(components!["box"]).toEqual({
+    body: [
+      {
+        from: "div",
+        body: "unique child",
+        style: "text-red-500",
+      },
+    ],
+  });
+});
+
+test("shortcut for component reference in body array with other properties with implicit body", () => {
+  const yaml = `
+box:
+  - div: unique child
+    style: text-red-500
+`;
+  const components = normalizeAll(parseYaml(yaml)!);
+  expect(components!["box"]).toEqual({
+    body: [
+      {
+        from: "div",
+        body: "unique child",
+        style: "text-red-500",
+      },
+    ],
+  });
+});
+
+test("renders built-in HTML tags p, h2, span, and div with parameters and styles with implicit body", () => {
+  const yaml = `
+ box:
+   from: div
+   body:
+     - p: $pContent
+       style: text-red-500
+     - h2: $h2Content
+     - span: $spanContent
+       style: font-bold
+     - div: $divContent
+       style: bg-blue-100 p-2
+ `;
+  const components = normalizeAll(parseYaml(yaml)!);
+  expect(
+    parseProps(components!["box"], {
+      pContent: "Paragraph text",
+      h2Content: "Heading text",
+      spanContent: "Span text",
+      divContent: "Div text",
+    })
+  ).toEqual({
+    from: "div",
+    body: [
+      {
+        from: "p",
+        body: "Paragraph text",
+        style: "text-red-500",
+      },
+      {
+        from: "h2",
+        body: "Heading text",
+      },
+      {
+        from: "span",
+        body: "Span text",
+        style: "font-bold",
+      },
+      {
+        from: "div",
+        body: "Div text",
+        style: "bg-blue-100 p-2",
+      },
+    ],
+  });
+});
+
+test("render array of elements", () => {
+  const yaml = `
+box1:
+  from: ul
+  body: $content
+box:
+  from: box1
+  content:
+    - from: li
+      body: first child
+    - from: li
+      body: second child
+    - from: li
+      body: third child
+`;
+  const components = normalizeAll(parseYaml(yaml)!);
+  const parsedBody = parseFrom(components!["box"], components!);
+  expect(parsedBody).toEqual({
+    from: "ul",
+    body: [
+      { from: "li", body: "first child" },
+      { from: "li", body: "second child" },
+      { from: "li", body: "third child" },
     ],
   });
 });

@@ -29,7 +29,7 @@ const parse = (
       : { from: body };
     return {
       ...target,
-      body: parsedBody,
+      ...parsedBody,
     };
   }
   return target;

@@ -13,15 +13,20 @@ const parse = (name: string, components: SetOfComponents): ComponentProps => {
   if (!target) {
     return template;
   }
-  let parsedTemplate = parseProps(
-    Object.fromEntries(
-      Object.entries(template).map(([key, value]) => [
-        key,
-        target[key] ?? value,
-      ])
-    ),
-    target
-  );
+  const parseTemplate = (target: ComponentProps) =>
+    parseProps(
+      Object.fromEntries(
+        Object.entries(template).map(([key, value]) => [
+          key,
+          target[key] ?? value,
+        ])
+      ),
+      target
+    );
+  const parsedTemplate = Array.isArray(target.body)
+    ? { ...target, body: target.body.map((item) => parseTemplate(item)) }
+    : parseTemplate(target);
+
   const result = parseBody(parsedTemplate, components) as ComponentProps;
   return parseFrom(
     {
