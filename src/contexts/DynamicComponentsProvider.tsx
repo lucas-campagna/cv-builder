@@ -1,4 +1,5 @@
-import parseDynamicComponent, { type YamlData } from "@/utils/parseDynamicComponents";
+import buildDocument from "@/core/parsers/documentBuilder";
+import type { YamlData } from "@/utils/parseDynamicComponents";
 import React, { createContext, useCallback, useState, Component } from "react";
 
 type TDynamicComponents = {
@@ -9,10 +10,13 @@ type TDynamicComponents = {
 const Cv: React.FC = () => <>No CV</>;
 const defaultDynamicComponents: TDynamicComponents = {
   Cv,
-  update: (_: YamlData) => { },
+  update: (_: YamlData) => {},
 };
 
-class ErrorBoundary extends Component<{ fallback: React.FC; children: React.ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends Component<
+  { fallback: React.FC; children: React.ReactNode },
+  { hasError: boolean }
+> {
   constructor(props: { fallback: React.FC; children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
@@ -23,7 +27,7 @@ class ErrorBoundary extends Component<{ fallback: React.FC; children: React.Reac
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('CV render error:', error, errorInfo);
+    console.error("CV render error:", error, errorInfo);
   }
 
   render() {
@@ -42,17 +46,28 @@ export default function DynamicComponentsProvider({
   children: React.ReactNode;
 }) {
   const [currentCv, setCurrentCv] = useState<React.FC>(() => Cv);
-  const [previousWorkingCv, setPreviousWorkingCv] = useState<React.FC>(() => Cv);
-  const update = useCallback((yamlData: YamlData) => {
-    setPreviousWorkingCv(() => currentCv);
-    try {
-      const newComponents = parseDynamicComponent(yamlData) ?? {};
-      const newCv = (newComponents.cv ?? Cv) as React.FC;
-      setCurrentCv(() => () => React.createElement(ErrorBoundary, { fallback: previousWorkingCv, children: React.createElement(newCv) }));
-    } catch {
-      // keep current
-    }
-  }, [currentCv, previousWorkingCv]);
+  const [previousWorkingCv, setPreviousWorkingCv] = useState<React.FC>(
+    () => Cv
+  );
+  const update = useCallback(
+    (yamlData: YamlData) => {
+      setPreviousWorkingCv(() => currentCv);
+      try {
+        const newComponent = buildDocument(yamlData as any);
+        const newCv = (newComponent ?? Cv) as React.FC;
+        setCurrentCv(
+          () => () =>
+            React.createElement(ErrorBoundary, {
+              fallback: previousWorkingCv,
+              children: React.createElement(newCv),
+            })
+        );
+      } catch {
+        // keep current
+      }
+    },
+    [currentCv, previousWorkingCv]
+  );
 
   return (
     <DynamicComponents.Provider value={{ Cv: currentCv, update }}>
