@@ -3,7 +3,7 @@ import type { ComponentProps, PropsType } from "./types";
 const varRegEx = /\$(\w+)/g;
 const parse = (
   target: ComponentProps,
-  values: PropsType
+  values: PropsType = {}
 ): ComponentProps => {
   const isPureVariable = (str: string) => {
     const match = str.match(varRegEx);

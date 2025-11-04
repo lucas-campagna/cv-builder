@@ -8,7 +8,7 @@ import { normalizeAll } from "./normalizer";
 const build = (
   name: string,
   components: SetOfComponents = {}
-): ((_: PropsType) => ComponentProps) => {
+): ((_?: PropsType) => ComponentProps) => {
   const normalizedComponents = normalizeAll(components);
   let target: ComponentProps = normalizedComponents[name];
   if (!target) {
@@ -17,7 +17,7 @@ const build = (
   target = parseTemplate(name, normalizedComponents);
   target = parseFrom(target, normalizedComponents);
   target = parseBody(target, normalizedComponents);
-  return (props: PropsType) => parseProps(target, props);
+  return (props) => parseProps(target, props);
 };
 
 export default build;
