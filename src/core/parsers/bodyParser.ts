@@ -7,14 +7,24 @@ const parse = (
   components: SetOfComponents = {}
 ): ComponentProps => {
   const isComponent = (name: string) => components[name] !== undefined;
+  if (typeof target === "string") {
+    if (isComponent(target)) {
+      return parseFrom({ from: target }, components);
+    } else if (isHtmlTag(target)) {
+      return { from: target };
+    } else {
+      return { body: target };
+    }
+  }
   const { body } = target;
   if (!body) {
     return parseFrom(target, components);
   }
   if (Array.isArray(body)) {
+    const parsedBody = body.map((b) => parse(b, components));
     return {
       ...target,
-      body: body.map((b) => parse(b, components)),
+      body: parsedBody,
     };
   }
   if (typeof body === "object" && body !== null) {
