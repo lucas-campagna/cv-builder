@@ -750,7 +750,6 @@ box1:
 `;
   const component = buildComponent("box", parseYaml(yaml)!);
   expect(component()).toEqual({
-    from: "div",
     body: [
       {
         from: "div",
