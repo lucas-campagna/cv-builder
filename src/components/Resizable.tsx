@@ -14,13 +14,27 @@ const Resizable = ({
   return (
     <ResizablePanelGroup {...props}>
       {areas.map((area, index) => (
-        <>
-          <ResizablePanel key={index}>{area}</ResizablePanel>
-          {index !== areas.length - 1 && <ResizableHandle />}
-        </>
+        <ResizablePanelItem
+          area={area}
+          key={index}
+          last={index < areas.length - 1}
+        />
       ))}
     </ResizablePanelGroup>
   );
 };
+
+const ResizablePanelItem = ({
+  area,
+  last,
+}: {
+  area: React.ReactNode;
+  last: boolean;
+}) => (
+  <>
+    <ResizablePanel>{area}</ResizablePanel>
+    {last && <ResizableHandle />}
+  </>
+);
 
 export default Resizable;
