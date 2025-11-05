@@ -3,13 +3,13 @@ import type { YamlData } from "@/utils/parseDynamicComponents";
 import React, { createContext, useCallback, useState, Component } from "react";
 
 type TDynamicComponents = {
-  Cv: React.FC;
+  Document: React.FC;
   update: (_: YamlData) => void;
 };
 
-const Cv: React.FC = () => <>No CV</>;
+const DEFAULT_DOCUMENT: React.FC = () => <>No Document</>;
 const defaultDynamicComponents: TDynamicComponents = {
-  Cv,
+  Document: DEFAULT_DOCUMENT,
   update: (_: YamlData) => {},
 };
 
@@ -27,7 +27,7 @@ class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("CV render error:", error, errorInfo);
+    console.error("Document render error:", error, errorInfo);
   }
 
   render() {
@@ -45,32 +45,33 @@ export default function DynamicComponentsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentCv, setCurrentCv] = useState<React.FC>(() => Cv);
+  const [currentDocument, setCurrentDocument] = useState<React.FC>(
+    () => DEFAULT_DOCUMENT
+  );
   const [previousWorkingCv, setPreviousWorkingCv] = useState<React.FC>(
-    () => Cv
+    () => currentDocument
   );
   const update = useCallback(
     (yamlData: YamlData) => {
-      setPreviousWorkingCv(() => currentCv);
+      setPreviousWorkingCv(() => currentDocument);
       try {
         const newComponent = buildDocument(yamlData as any);
-        const newCv = (newComponent ?? Cv) as React.FC;
-        setCurrentCv(
+        setCurrentDocument(
           () => () =>
             React.createElement(ErrorBoundary, {
               fallback: previousWorkingCv,
-              children: React.createElement(newCv),
+              children: <div dangerouslySetInnerHTML={{ __html: newComponent() }} />,
             })
         );
       } catch {
         // keep current
       }
     },
-    [currentCv, previousWorkingCv]
+    [currentDocument, previousWorkingCv]
   );
 
   return (
-    <DynamicComponents.Provider value={{ Cv: currentCv, update }}>
+    <DynamicComponents.Provider value={{ Document: currentDocument, update }}>
       {children}
     </DynamicComponents.Provider>
   );

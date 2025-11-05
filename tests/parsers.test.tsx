@@ -5,6 +5,7 @@ import parseYaml from "../src/core/parsers/yamlParser";
 import { normalize } from "../src/core/parsers/normalizer";
 import buildComponent from "../src/core/parsers/componentBuilder";
 import buildDocument from "../src/core/parsers/documentBuilder";
+import React from "react";
 
 test("simple component parser", () => {
   const component = renderComponent({
@@ -12,8 +13,7 @@ test("simple component parser", () => {
     style: "bg-red-100",
     body: "My Box",
   });
-  const { container } = render(component);
-  expect(container.innerHTML).toBe(`<div class="bg-red-100">My Box</div>`);
+  expect(component).toBe(`<div class="bg-red-100">My Box</div>`);
 });
 
 test("simple component parser with variables", () => {
@@ -144,8 +144,7 @@ test("without style and body as array with null", () => {
     ],
   };
   const boxParsed = buildDocument({ box }, "box");
-  const { container } = render(boxParsed());
-  expect(container.innerHTML).toBe(
+  expect(boxParsed()).toBe(
     `<div id="parent"><div>first child</div><div>second child</div></div>`
   );
 });
@@ -167,8 +166,7 @@ test("render list of children with multiple values", () => {
     ],
   };
   const boxParsed = buildDocument({ box }, "box");
-  const { container } = render(boxParsed());
-  expect(container.innerHTML).toBe(
+  expect(boxParsed()).toBe(
     `<div id="parent"><div>first child</div><div>second child</div>third child</div>`
   );
 });
@@ -378,8 +376,7 @@ test("multi level body with implicit from", () => {
     },
   });
   const boxParsed = renderComponent(box);
-  const { container } = render(boxParsed);
-  expect(container.innerHTML).toBe(
+  expect(boxParsed).toBe(
     `<div class="bg-red-100 p-1"><div class="bg-yellow-100 p-1"><div class="bg-green-100 p-1 size-1"></div></div></div>`
   );
 });
@@ -391,8 +388,7 @@ test("implicit from array", () => {
     { style: "bg-green-100 p-1 size-1" },
   ]);
   const boxParsed = buildDocument({ box }, "box");
-  const { container } = render(boxParsed());
-  expect(container.innerHTML).toBe(
+  expect(boxParsed()).toBe(
     `<div class="bg-red-100 p-1"></div><div class="bg-yellow-100 p-1"></div><div class="bg-green-100 p-1 size-1"></div>`
   );
 });
@@ -739,14 +735,11 @@ test("using props with template", () => {
   const yaml = `
 box:
   - box1
-  
 $box1:
   from: div
   body: $name
-
 box1:
   name: test
-
 `;
   const component = buildComponent("box", parseYaml(yaml)!);
   expect(component()).toEqual({
@@ -757,4 +750,22 @@ box1:
       },
     ],
   });
+});
+
+test("allowing any props", () => {
+  const yaml = `
+box:
+  - from: btn
+    text: Hello
+  - from: btn
+    text: World
+btn:
+  from: button
+  body: $text
+  onclick: alert("$text")
+`;
+  const component = buildDocument(yaml, "box");
+  expect(component()).toBe(
+    `<button onclick="alert(&quot;Hello&quot;)">Hello</button><button onclick="alert(&quot;World&quot;)">World</button>`
+  );
 });
