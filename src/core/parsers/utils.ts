@@ -23,5 +23,6 @@ const HTMLTAGS = [
   "form",
   "input",
   "label",
+  "button",
 ]
 export const isHtmlTag = (name: string) => HTMLTAGS.includes(name);
