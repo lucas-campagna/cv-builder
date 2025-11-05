@@ -23,9 +23,14 @@ export const normalize = (
   if (typeof target === "object" && target !== null) {
     if (target.body) {
       const parsedBody = normalize(target.body, parsedComponents);
+      const hasOnlyBody =
+        parsedBody &&
+        typeof parsedBody === "object" &&
+        "body" in parsedBody &&
+        Object.keys(parsedBody).length === 1;
       return {
         ...target,
-        body: parsedBody?.body ?? parsedBody,
+        body: hasOnlyBody ? parsedBody.body : parsedBody,
       };
     }
     if (target.from) return target;
