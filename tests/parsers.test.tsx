@@ -1,13 +1,10 @@
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import renderComponent from "../src/core/parsers/renderer";
-import parseProps from "../src/core/parsers/propsParser";
-import parseFrom from "../src/core/parsers/fromParser";
-import parseBody from "../src/core/parsers/bodyParser";
-import parseTemplate from "../src/core/parsers/templateParser";
 import parseYaml from "../src/core/parsers/yamlParser";
-import { normalizeAll, normalize } from "../src/core/parsers/normalizer";
-// import buildComponent from "../src/core/parsers/componentBuilder";
+import { normalize } from "../src/core/parsers/normalizer";
+import buildComponent from "../src/core/parsers/componentBuilder";
+import buildDocument from "../src/core/parsers/documentBuilder";
 
 test("simple component parser", () => {
   const component = renderComponent({
@@ -25,8 +22,8 @@ test("simple component parser with variables", () => {
     style: "bg-red-100",
     body: "$text",
   };
-  const parsedBox = parseProps(box, { text: "Hello" });
-  expect(parsedBox).toEqual({
+  const parsedBox = buildComponent("box", { box });
+  expect(parsedBox({ text: "Hello" })).toEqual({
     from: "div",
     style: "bg-red-100",
     body: "Hello",
@@ -43,9 +40,9 @@ test("converts YAML with component composition", () => {
     from: "box1",
     text: "My Comp",
   };
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseFrom(box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     style: "bg-blue-100 p-2",
     body: "My Comp",
@@ -71,9 +68,9 @@ test("testing deep inheritance", () => {
     style: "bg-green-100",
     body: "$text",
   };
-  const components = normalizeAll({ box, box2, any_name, final });
-  const boxParsed = parseFrom(final, components);
-  expect(boxParsed).toEqual({
+  const components = { box, box2, any_name, final };
+  const boxParsed = buildComponent("final", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     style: "bg-green-100",
     body: 123,
@@ -90,9 +87,9 @@ test("testing style inheritance", () => {
     style: "$ss",
     body: "My Box",
   };
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseFrom(box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     style: "width-[20px]",
     body: "My Box",
@@ -109,9 +106,9 @@ test("test both parameters", () => {
     style: "$ss",
     body: "$ss",
   };
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseFrom(box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     style: "width-[20px]",
     body: "width-[20px]",
@@ -119,19 +116,19 @@ test("test both parameters", () => {
 });
 
 test("simple test without style", () => {
-  const box = normalize({
+  const box = {
     from: "div",
     body: "My Comp",
-  });
-  const boxParsed = parseFrom(box);
-  expect(boxParsed).toEqual({
+  };
+  const boxParsed = buildComponent("box", { box });
+  expect(boxParsed()).toEqual({
     from: "div",
     body: "My Comp",
   });
 });
 
 test("without style and body as array with null", () => {
-  const box = normalize({
+  const box = {
     from: "div",
     id: "parent",
     body: [
@@ -145,16 +142,16 @@ test("without style and body as array with null", () => {
       },
       null,
     ],
-  });
-  const boxParsed = renderComponent(box);
-  const { container } = render(boxParsed);
+  };
+  const boxParsed = buildDocument({ box }, "box");
+  const { container } = render(boxParsed());
   expect(container.innerHTML).toBe(
     `<div id="parent"><div>first child</div><div>second child</div></div>`
   );
 });
 
 test("render list of children with multiple values", () => {
-  const box = normalize({
+  const box = {
     from: "div",
     id: "parent",
     body: [
@@ -168,9 +165,9 @@ test("render list of children with multiple values", () => {
       },
       "third child",
     ],
-  });
-  const boxParsed = renderComponent(box);
-  const { container } = render(boxParsed);
+  };
+  const boxParsed = buildDocument({ box }, "box");
+  const { container } = render(boxParsed());
   expect(container.innerHTML).toBe(
     `<div id="parent"><div>first child</div><div>second child</div>third child</div>`
   );
@@ -196,9 +193,9 @@ test("render list of composable children", () => {
       "third child",
     ],
   };
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseBody(components.box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     id: "parent",
     body: [
@@ -239,9 +236,9 @@ test("render list of multiple composable children", () => {
       "third child",
     ],
   };
-  const components = normalizeAll({ box1, box2, box });
-  const boxParsed = parseBody(components.box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box2, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     id: "parent",
     body: [
@@ -272,9 +269,9 @@ test("render list of multiple composable children with implicit from 2", () => {
     id: "parent",
     body: ["box1", "box2"],
   };
-  const components = normalizeAll({ box1, box2, box });
-  const boxParsed = parseBody(components.box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box2, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     id: "parent",
     body: [
@@ -303,9 +300,9 @@ test("render composable children", () => {
       value: "first child",
     },
   };
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseBody(components.box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     from: "div",
     id: "parent",
     body: {
@@ -326,16 +323,16 @@ test("combine props", () => {
     s2: "width-2",
     s3: "$s3",
   };
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseFrom(box, components);
-  expect(parseProps(boxParsed, { s3: "height-3" })).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed({ s3: "height-3" })).toEqual({
     from: "div",
     style: "bg-red-100 width-2 height-3",
   });
 });
 
 test("without style and implicit body as array", () => {
-  const box = [
+  const box = normalize([
     {
       from: "div",
       body: "first child",
@@ -344,10 +341,10 @@ test("without style and implicit body as array", () => {
       from: "div",
       body: "second child",
     },
-  ];
-  const components = normalizeAll({ box });
-  const parsedBox = parseBody(components.box, components);
-  expect(parsedBox).toEqual({
+  ]);
+  const components = { box };
+  const parsedBox = buildComponent("box", components);
+  expect(parsedBox()).toEqual({
     body: [
       {
         from: "div",
@@ -365,13 +362,13 @@ test("handling undefined from field", () => {
   const box = {
     from: undefined,
   };
-  const boxParsed = renderComponent(box);
-  const { container } = render(boxParsed);
+  const boxParsed = buildDocument({ box }, "box");
+  const { container } = render(boxParsed());
   expect(container.innerHTML).toBe(``);
 });
 
 test("multi level body with implicit from", () => {
-  const box = {
+  const box = normalize({
     style: "bg-red-100 p-1",
     body: {
       style: "bg-yellow-100 p-1",
@@ -379,7 +376,7 @@ test("multi level body with implicit from", () => {
         style: "bg-green-100 p-1 size-1",
       },
     },
-  };
+  });
   const boxParsed = renderComponent(box);
   const { container } = render(boxParsed);
   expect(container.innerHTML).toBe(
@@ -388,13 +385,13 @@ test("multi level body with implicit from", () => {
 });
 
 test("implicit from array", () => {
-  const box = [
+  const box = normalize([
     { style: "bg-red-100 p-1" },
     { style: "bg-yellow-100 p-1" },
     { style: "bg-green-100 p-1 size-1" },
-  ];
-  const boxParsed = renderComponent({ body: box });
-  const { container } = render(boxParsed);
+  ]);
+  const boxParsed = buildDocument({ box }, "box");
+  const { container } = render(boxParsed());
   expect(container.innerHTML).toBe(
     `<div class="bg-red-100 p-1"></div><div class="bg-yellow-100 p-1"></div><div class="bg-green-100 p-1 size-1"></div>`
   );
@@ -414,9 +411,9 @@ test("render list of multiple composable children with implicit from and no body
   const box = {
     body: ["box1", "box2"],
   };
-  const components = normalizeAll({ box1, box2, box });
-  const boxParsed = parseBody(components.box, components);
-  expect(boxParsed).toEqual({
+  const components = { box1, box2, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     body: [
       {
         from: "div",
@@ -441,9 +438,9 @@ test("optional props", () => {
     { from: "box1", b: "bg-blue-100" },
     { from: "box1", a: "bg-red-100", b: "bg-yellow-100" },
   ] as any;
-  const components = normalizeAll({ box1, box });
-  const boxParsed = parseBody(components.box, components as any);
-  expect(boxParsed).toEqual({
+  const components = { box1, box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     body: [
       { style: "bg-red-100 " },
       { style: " bg-blue-100" },
@@ -463,9 +460,9 @@ test("template components with implicit from", () => {
     size: "size-1",
     body: "instance",
   };
-  const components = normalizeAll({ box, $box });
-  const boxParsed = parseTemplate("box", components);
-  expect(boxParsed).toEqual({
+  const components = { box, $box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     id: "target",
     style: "bg-green-100 p-1 size-1",
     body: "instance",
@@ -484,9 +481,9 @@ test("template components with body replacement and explicit from", () => {
     first: "jesus",
     second: "christ",
   };
-  const components = normalizeAll({ box, $box });
-  const boxParsed = parseTemplate("box", components);
-  expect(boxParsed).toEqual({
+  const components = { box, $box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     id: "target",
     body: [
       { from: "div", body: "jesus" },
@@ -504,9 +501,9 @@ test("template components with body replacement as string", () => {
     first: "jesus",
     second: "christ",
   };
-  const components = normalizeAll({ box, $box });
-  const boxParsed = parseTemplate("box", components);
-  expect(boxParsed).toEqual({
+  const components = { box, $box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     id: "target",
     body: "jesus christ",
   });
@@ -529,9 +526,9 @@ test("template components with body replacement and implicit from", () => {
     first: "jesus",
     second: "christ",
   };
-  const components = normalizeAll({ jesus, christ, box, $box });
-  const boxParsed = parseTemplate("box", components);
-  expect(boxParsed).toEqual({
+  const components = { jesus, christ, box, $box };
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     id: "target",
     body: [
       {
@@ -558,9 +555,9 @@ test("template component with implicit from and list children", () => {
     { color: "bg-green-100", size: "size-1" },
     { text: "test" },
   ];
-  const components = normalizeAll({ box, $box } as any);
-  const boxParsed = parseTemplate("box", components);
-  expect(boxParsed).toEqual({
+  const components = { box, $box } as any;
+  const boxParsed = buildComponent("box", components);
+  expect(boxParsed()).toEqual({
     body: [
       { style: "bg-red-100 p-1 ", body: "-> " },
       { style: "bg-yellow-100 p-1 ", body: "-> " },
@@ -586,9 +583,9 @@ box:
   - prop1: CompanyB
     prop2: 2023-2024
  `;
-  const components = normalizeAll(parseYaml(yaml)!);
-  const boxParsed = parseTemplate("box", components!);
-  expect(boxParsed).toEqual({
+  const components = parseYaml(yaml)!;
+  const boxParsed = buildComponent("box", components!);
+  expect(boxParsed()).toEqual({
     body: [
       {
         from: "div",
@@ -615,8 +612,8 @@ box:
     - p: third child
     - h2: fourth child
 `;
-  const components = normalizeAll(parseYaml(yaml)!);
-  expect(components!["box"]).toEqual({
+  const component = buildComponent("box", parseYaml(yaml));
+  expect(component()).toEqual({
     from: "div",
     id: "parent",
     body: [
@@ -635,8 +632,8 @@ box:
       body: unique child
       style: text-red-500
 `;
-  const components = normalizeAll(parseYaml(yaml)!);
-  expect(components!["box"]).toEqual({
+  const component = buildComponent("box", parseYaml(yaml)!);
+  expect(component()).toEqual({
     body: [
       {
         from: "div",
@@ -653,8 +650,8 @@ box:
   - div: unique child
     style: text-red-500
 `;
-  const components = normalizeAll(parseYaml(yaml)!);
-  expect(components!["box"]).toEqual({
+  const component = buildComponent("box", parseYaml(yaml)!);
+  expect(component()).toEqual({
     body: [
       {
         from: "div",
@@ -678,9 +675,9 @@ test("renders built-in HTML tags p, h2, span, and div with parameters and styles
      - div: $divContent
        style: bg-blue-100 p-2
  `;
-  const components = normalizeAll(parseYaml(yaml)!);
+  const component = buildComponent("box", parseYaml(yaml)!);
   expect(
-    parseProps(components!["box"], {
+    component({
       pContent: "Paragraph text",
       h2Content: "Heading text",
       spanContent: "Span text",
@@ -727,14 +724,38 @@ box:
     - from: li
       body: third child
 `;
-  const components = normalizeAll(parseYaml(yaml)!);
-  const parsedBody = parseFrom(components!["box"], components!);
-  expect(parsedBody).toEqual({
+  const component = buildComponent("box", parseYaml(yaml)!);
+  expect(component()).toEqual({
     from: "ul",
     body: [
       { from: "li", body: "first child" },
       { from: "li", body: "second child" },
       { from: "li", body: "third child" },
+    ],
+  });
+});
+
+test("using props with template", () => {
+  const yaml = `
+box:
+  - box1
+  
+$box1:
+  from: div
+  body: $name
+
+box1:
+  name: test
+
+`;
+  const component = buildComponent("box", parseYaml(yaml)!);
+  expect(component()).toEqual({
+    from: "div",
+    body: [
+      {
+        from: "div",
+        body: "test",
+      },
     ],
   });
 });
