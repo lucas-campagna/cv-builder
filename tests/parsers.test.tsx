@@ -769,3 +769,58 @@ btn:
     `<button onclick="alert(&quot;Hello&quot;)">Hello</button><button onclick="alert(&quot;World&quot;)">World</button>`
   );
 });
+
+test("inherintance with properties in a list", () => {
+  const yaml = `
+document:
+  - experience
+
+row:
+  style: flex justify-between
+  body:
+    - $left
+    - $right
+
+section:
+  from: h2
+  style: text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1
+  body: $title
+
+$experiences:
+  body:
+    - from: row
+      left: $company
+      right: $type
+    - from: row
+      left: $position
+      right: $date
+    - from: p
+      body: $description
+
+experience:
+  body:
+    - from: section
+      title: Experience
+    - from: div
+      style: px-2
+      body:
+        - experiences
+
+experiences:
+  - company: HP
+    date: 2020-2023
+    position: Sofware Developer
+    type: Remote
+    description: short description
+  - company: HP
+    date: 2020-2023
+    position: Sofware Developer
+    type: Remote
+    description: short description
+
+`;
+  const component = buildDocument(yaml);
+  expect(component()).toBe(
+    `<h2 class="text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1">Experience</h2><div class="px-2"><div class="flex justify-between"><div>HP</div><div>Remote</div></div><div class="flex justify-between"><div>Sofware Developer</div><div>2020-2023</div></div><p>short description</p><div class="flex justify-between"><div>HP</div><div>Remote</div></div><div class="flex justify-between"><div>Sofware Developer</div><div>2020-2023</div></div><p>short description</p></div>`
+  );
+});
