@@ -3,7 +3,7 @@ import type { YamlData } from "@/utils/parseDynamicComponents";
 import React, { createContext, useCallback, useState, Component } from "react";
 
 type TDynamicComponents = {
-  Document: React.FC;
+  Document: React.FC<{props?: any}>;
   update: (_: YamlData) => void;
 };
 
@@ -57,14 +57,15 @@ export default function DynamicComponentsProvider({
       try {
         const newComponent = buildDocument(yamlData as any);
         setCurrentDocument(
-          () => () =>
+          () => (props?: any) =>
             React.createElement(ErrorBoundary, {
               fallback: previousWorkingCv,
-              children: <div dangerouslySetInnerHTML={{ __html: newComponent() }} />,
+              children: <div {...props} dangerouslySetInnerHTML={{ __html: newComponent() }} />,
             })
         );
-      } catch {
+      } catch(e) {
         // keep current
+        console.error(e);
       }
     },
     [currentDocument, previousWorkingCv]
