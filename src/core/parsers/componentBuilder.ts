@@ -10,14 +10,22 @@ const build = (
   components: SetOfComponents = {}
 ): ((_?: PropsType) => ComponentProps) => {
   const normalizedComponents = normalizeAll(components);
-  let target: ComponentProps = normalizedComponents[name];
-  if (!target) {
-    return () => ({});
-  }
-  target = parseTemplate(name, normalizedComponents);
-  target = parseFrom(target, normalizedComponents);
-  target = parseBody(target, normalizedComponents);
+  const target = buildCoreComponent(name, normalizedComponents);
   return (props) => parseProps(target, props);
+};
+
+export const buildCoreComponent = (
+  name: string,
+  components: SetOfComponents = {}
+): ComponentProps => {
+  let target: ComponentProps = components[name];
+  if (!target) {
+    return {};
+  }
+  target = parseTemplate(name, components);
+  target = parseFrom(target, components);
+  target = parseBody(target, components);
+  return target;
 };
 
 export default build;

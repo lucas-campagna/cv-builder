@@ -1,6 +1,9 @@
 import type { ComponentProps, SetOfComponents } from "./types";
 import parseFrom from "./fromParser";
 import { isHtmlTag } from "./utils";
+import { buildCoreComponent as build } from "./componentBuilder";
+
+const generateName = () => crypto.randomUUID();
 
 const parse = (
   target: ComponentProps,
@@ -21,16 +24,26 @@ const parse = (
     return parseFrom(target, components);
   }
   if (Array.isArray(body)) {
-    const parsedBody = body.map((b) => parse(b, components));
+    const parsedBody = body.map((b) => {
+      const name = generateName();
+      return build(name, {
+        ...components,
+        [name]: typeof b === "string" ? { body: b } : (b as ComponentProps),
+      });
+    });
     return {
       ...target,
       body: parsedBody,
     };
   }
   if (typeof body === "object" && body !== null) {
+    const name = generateName();
     return {
       ...target,
-      body: parse(body as ComponentProps, components),
+      body: build(name, {
+        ...components,
+        [name]: body as ComponentProps,
+      }),
     };
   }
   if (typeof body === "string" && (isComponent(body) || isHtmlTag(body))) {
