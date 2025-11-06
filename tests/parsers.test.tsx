@@ -778,8 +778,8 @@ document:
 row:
   style: flex justify-between
   body:
-    - $left
-    - $right
+    - div: $left
+    - div: $right
 
 section:
   from: h2
