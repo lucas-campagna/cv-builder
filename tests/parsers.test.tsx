@@ -824,3 +824,23 @@ experiences:
     `<h2 class="text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1">Experience</h2><div class="px-2"><div class="flex justify-between"><div>HP</div><div>Remote</div></div><div class="flex justify-between"><div>Sofware Developer</div><div>2020-2023</div></div><p>short description</p><div class="flex justify-between"><div>HP</div><div>Remote</div></div><div class="flex justify-between"><div>Sofware Developer</div><div>2020-2023</div></div><p>short description</p></div>`
   );
 });
+
+
+
+test("implicit item with implicit body", () => {
+  const yaml = `
+document:
+  - bulletPoint: item 1
+  - bulletPoint: item 2
+  - bulletPoint: item 3
+
+bulletPoint:
+  from: li
+  style: list-disc ml-5 my-1 text-base
+
+`;
+  const component = buildDocument(yaml);
+  expect(component()).toBe(
+    `<li class="list-disc ml-5 my-1 text-base">item 1</li><li class="list-disc ml-5 my-1 text-base">item 2</li><li class="list-disc ml-5 my-1 text-base">item 3</li>`
+  );
+})
