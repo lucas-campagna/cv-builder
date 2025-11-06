@@ -24,5 +24,6 @@ const HTMLTAGS = [
   "input",
   "label",
   "button",
+  "pre",
 ]
 export const isHtmlTag = (name: string) => HTMLTAGS.includes(name);
