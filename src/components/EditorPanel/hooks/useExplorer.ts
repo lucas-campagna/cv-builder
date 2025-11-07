@@ -13,7 +13,6 @@ export const useExplorer = () => {
     : null;
   useEffect(() => {
     const allContent = Object.values(context.fileTree).join("\n\n");
-    console.log(allContent);
     update(allContent);
   }, [fileContent]);
   return context;
