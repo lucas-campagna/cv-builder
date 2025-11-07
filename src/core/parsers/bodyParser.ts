@@ -2,6 +2,7 @@ import type { ComponentProps, SetOfComponents } from "./types";
 import parseFrom from "./fromParser";
 import { isHtmlTag } from "./utils";
 import { buildCoreComponent as build } from "./componentBuilder";
+import { normalize } from "./normalizer";
 
 const generateName = () => crypto.randomUUID();
 
@@ -33,7 +34,7 @@ const parse = (
     });
     return {
       ...target,
-      body: parsedBody,
+      body: normalize(parsedBody, components).body,
     };
   }
   if (typeof body === "object" && body !== null) {
