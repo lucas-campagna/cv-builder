@@ -1,0 +1,4 @@
+section:
+  from: h2
+  style: text-lg font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-1
+  body: $title

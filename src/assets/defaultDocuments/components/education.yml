@@ -1,0 +1,19 @@
+$educations:
+  body:
+    - from: row
+      left: $college
+      right: $date
+    - from: row
+      left: $course
+      right: $gpa
+    - from: p
+      body: $description
+
+education:
+  body:
+    - from: section
+      title: Education
+    - from: div
+      style: px-2
+      body:
+        - educations

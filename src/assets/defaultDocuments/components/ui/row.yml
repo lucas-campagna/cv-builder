@@ -1,0 +1,5 @@
+row:
+  style: flex justify-between
+  body:
+    - div: $left
+    - div: $right

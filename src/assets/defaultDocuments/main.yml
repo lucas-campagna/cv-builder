@@ -1,0 +1,38 @@
+headline:
+  name: Lucas Prett Campagna
+  email: lucaspcampagna@gmail.com
+  github: lucas-campagna
+  linkedin: lucas-prett-campagna
+
+experiences:
+  - company: HP
+    date: 2020-2023
+    position: Sofware Developer
+    type: Remote
+    description:
+      asddsa
+      asdasd
+
+  - company: HP
+    date: 2020-2023
+    position: Sofware Developer
+    type: Remote
+    description:
+      asddsa
+      asdasd
+
+educations:
+  - college: Fluminense Federal University
+    date: 2017-2019
+    course: M.S. Computational Physics
+    gpa: 8.9
+    description: asdasd
+
+      
+  - college: Fluminense Federal University
+    date: 2013-2017
+    course: B.E. Computational Physics
+    gpa: 8.9
+    description:
+      asddsa
+      asdasd

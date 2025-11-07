@@ -1,0 +1,17 @@
+$headline:
+  style: flex flex-col items-center pb-3
+  body:
+    - h1: $name
+      style: text-2xl
+    - from: div
+      style: flex gap-2 text-xs pt-1
+      body:
+      - a: $email
+        href: mailto:$email
+        target: _blank
+      - a: $github
+        href: https://github.com/$github
+        target: _blank
+      - a: $linkedin
+        href: https://linkedin.com/in/$linkedin
+        target: _blank

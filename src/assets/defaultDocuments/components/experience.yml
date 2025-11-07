@@ -1,0 +1,19 @@
+$experiences:
+  body:
+    - from: row
+      left: $company
+      right: $type
+    - from: row
+      left: $position
+      right: $date
+    - from: p
+      body: $description
+
+experience:
+  body:
+    - from: section
+      title: Experience
+    - from: div
+      style: px-2
+      body:
+        - experiences
