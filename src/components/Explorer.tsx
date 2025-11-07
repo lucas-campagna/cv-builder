@@ -1,4 +1,4 @@
-import { useExplorer } from "@/hooks/useExplorer";
+import { useExplorer } from "@/components/EditorPanel/hooks/useExplorer";
 import { Button } from "./ui/button";
 
 const Explorer = () => {

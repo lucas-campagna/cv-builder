@@ -1,16 +1,15 @@
 import buildDocument from "@/core/parsers/documentBuilder";
-import type { YamlData } from "@/utils/parseDynamicComponents";
 import React, { createContext, useCallback, useState, Component } from "react";
 
 type TDynamicComponents = {
   Document: React.FC<{props?: any}>;
-  update: (_: YamlData) => void;
+  update: (_: string) => void;
 };
 
 const DEFAULT_DOCUMENT: React.FC = () => <>No Document</>;
 const defaultDynamicComponents: TDynamicComponents = {
   Document: DEFAULT_DOCUMENT,
-  update: (_: YamlData) => {},
+  update: (_: string) => {},
 };
 
 class ErrorBoundary extends Component<
@@ -52,10 +51,10 @@ export default function DynamicComponentsProvider({
     () => currentDocument
   );
   const update = useCallback(
-    (yamlData: YamlData) => {
+    (yamlData: string) => {
       setPreviousWorkingCv(() => currentDocument);
       try {
-        const newComponent = buildDocument(yamlData as any);
+        const newComponent = buildDocument(yamlData);
         setCurrentDocument(
           () => (props?: any) =>
             React.createElement(ErrorBoundary, {
