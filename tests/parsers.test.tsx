@@ -825,8 +825,6 @@ experiences:
   );
 });
 
-
-
 test("implicit item with implicit body", () => {
   const yaml = `
 document:
@@ -842,5 +840,43 @@ bulletPoint:
   const component = buildDocument(yaml);
   expect(component()).toBe(
     `<li class="list-disc ml-5 my-1 text-base">item 1</li><li class="list-disc ml-5 my-1 text-base">item 2</li><li class="list-disc ml-5 my-1 text-base">item 3</li>`
+  );
+})
+
+test("implicit item with implicit body in list and args", () => {
+  const yaml = `
+document:
+  - experience
+
+experience:
+  - h1: EXPERIENCES
+  - div: experiences
+    style: px-2
+
+$experiences:
+  - from: div
+    body: $company
+  - h2: $date
+  - p: $description
+
+experiences:
+  - company: Company A
+    date: 2024
+    description: Description A
+  - company: Company B
+    date: 2025
+    description:
+      - Description B
+      - p: Description B
+      - bullet: Description B
+
+bullet:
+  from: li
+  style: list-disc ml-5 my-1 text-base
+
+`;
+  const component = buildDocument(yaml);
+  expect(component()).toBe(
+  `<h1>EXPERIENCES</h1><div class="px-2"><div>Company A</div><h2>2024</h2><p>Description A</p><div>Company B</div><h2>2025</h2><p>Description B<p>Description B</p><li class="list-disc ml-5 my-1 text-base">Description B</li></p></div>`
   );
 })
