@@ -50,9 +50,8 @@ export const normalize = (
       delete parsedTarget[from];
       return parsedTarget;
     }
-    return target;
   }
-  return { body: target };
+  return target;
 };
 
 type RawSetOfComponents = SetOfComponents | { [key: string]: ComponentProps[] };
