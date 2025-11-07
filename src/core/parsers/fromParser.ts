@@ -1,6 +1,6 @@
 import type { ComponentProps, SetOfComponents } from "./types";
 import parseProps from "./propsParser";
-import parseTemplate from "./templateParser";
+import { buildCoreComponent as build } from "./componentBuilder";
 
 const parse = (
   target: ComponentProps,
@@ -10,9 +10,11 @@ const parse = (
   if (!from || !components[from]) {
     return target;
   }
-  const templated = parseTemplate(from, components);
+  const templated = build(from, components);
   return parse(
     {
+      body: target.body,
+      style: target.style,
       ...parseProps(templated, { ...components[from], ...props }),
       from: templated.from,
     },
