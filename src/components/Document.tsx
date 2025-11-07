@@ -6,10 +6,11 @@ import { createPortal } from "react-dom";
 import { useEffect } from "react";
 
 const Document = () => {
-  const { isDebugging } = useAppState();
+  const { isDebugging, onePage } = useAppState();
   const { Document } = useDynamicComponents();
   const DocumentPortal = () =>
-    createPortal(<Document />, document.getElementById("document")!);
+    // @ts-ignore
+    createPortal(<Document style={A4} />, document.getElementById("document")!);
 
   useEffect(() => {
     // Refresh lucide icons after each render
@@ -20,9 +21,16 @@ const Document = () => {
     }
   }, [Document]);
 
+  const classView = onePage
+    ? `bg-gray-100 flex justify-center items-start h-full w-full overflow-y-auto`
+    : "bg-gray-100 flex justify-center items-start h-full w-full";
+  const classPaper = onePage
+    ? `bg-white min-w-[${A4.width}] w-[${A4.width}] h-[${A4.height}] overflow-hidden`
+    : `bg-white min-w-[${A4.width}] w-[${A4.width}] h-full overflow-y-auto`;
+
   return (
-    <div className="bg-gray-100 h-full w-full flex justify-center items-start">
-      <div className={`min-w-[${A4.width}] h-full bg-white overflow-y-auto`}>
+    <div className={classView}>
+      <div className={classPaper}>
         <DocumentPortal />
         {isDebugging ? renderToString(<Document />) : <Document />}
       </div>
