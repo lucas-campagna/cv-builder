@@ -5,34 +5,68 @@ headline:
   linkedin: lucas-prett-campagna
 
 experiences:
-  - company: HP
-    date: 2020-2023
-    position: Sofware Developer
+  - company: <a href="https://www.atlantico.com.br/">IA</a> / HP
+    date: 2024-Present
+    position: C++/React Developer
     type: Remote
     description:
-      asddsa
-      asdasd
+      - li: Developed an IPC SDK in C++ using WinRT for seamless communication between applications.
+      - li: Supported and enhanced ReactJs code using microfrontends architecture for improved user experience.
+      - li: Created NodeJs scripts to automate tasks and streamline processes.
 
-  - company: HP
-    date: 2020-2023
-    position: Sofware Developer
+  - company: <a href="https://www.spassu.com.br/">SPASSU</a> / Petrobras
+    date: 2023-2024
+    position: C++/Python Developer
     type: Remote
     description:
-      asddsa
-      asdasd
+      - li: Developed high-performance computing codes in C/C++ for the oil and gas industry.
+      - li: Created a new library for C++ and Python binding, reducing development time for geophysicists.
+      - li: Designed dashboards to streamline DevOps work for increased efficiency.
+
+  - company: <a href="https://lncc.br/">LNCC</a> / Petrobras
+    date: Dec 2022 - Mar 2023
+    position: Fortran Developer
+    type: Remote
+    description:
+      - li: Refactored numerical calculation codes in Fortran 77 to Fortran 90 with Object Orientation principles for oil and gas applications.
+      - li: Collaborated with the contracting team to update and rearchitect the codes for improved efficiency and accuracy.
+
+  - company: Federal University of Pará
+    date: 2021 - 2023
+    position: Fortran Developer
+    type: Remote
+    description:
+      - li: Refactored Fortran code for nano-magnetism and electronic structure problems using first principles.
+      - li: Collaborated with UFPA group and CNPq funding for project success.
+
+  - company: Nelogica
+    date: Apr 2022 - Dec 2022
+    position: Delphi Developer
+    type: Remote
+    description:
+      - li: Developed and maintained Delphi legacy code for stock trading and market analysis software on Windows platform.
+      - li: Collaborated with team to enhance software functionality and performance.
+      - li: Implemented new features and bug fixes to optimize user experience and increase efficiency.
+
+  - company: LNCC / Petrobras
+    date: 2020
+    position: C++/Python Developer
+    type: Remote
+    description:
+      - li: Integrated two C++ libraries for geophysics industry simulation, including a generalizable finite element algorithm solver and a parallelization tool at math level (MHM).
+      - li: Utilized expertise in Physics, Computing Science, and Numerical Calculation to successfully complete the project.
+      - li: Collaborated with Petrobras and partnered with Rio de Janeiro Federal University and National Laboratory for Scientific Computing.
 
 educations:
   - college: Fluminense Federal University
     date: 2017-2019
     course: M.S. Computational Physics
-    gpa: 8.9
-    description: asdasd
+    # gpa: 8.9
+    description: 'Relevant skills: Python/Numpy for data analysis, data ploting and Jupyter Notebook, Scientic research'
 
       
   - college: Fluminense Federal University
     date: 2013-2017
     course: B.E. Computational Physics
-    gpa: 8.9
-    description:
-      asddsa
-      asdasd
+    # gpa: 8.9
+    description: 'Relevant skills: C++, parallel computing, HPC, project organization'

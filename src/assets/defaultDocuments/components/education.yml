@@ -1,4 +1,5 @@
 $educations:
+  style: text-gray-700
   body:
     - from: row
       left: $college
@@ -6,7 +7,8 @@ $educations:
     - from: row
       left: $course
       right: $gpa
-    - from: p
+    - from: div
+      style: text-black
       body: $description
 
 education:
@@ -14,6 +16,5 @@ education:
     - from: section
       title: Education
     - from: div
-      style: px-2
-      body:
-        - educations
+      style: px-1
+      body: educations

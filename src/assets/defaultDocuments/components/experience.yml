@@ -1,12 +1,15 @@
 $experiences:
+  style: text-gray-700
   body:
     - from: row
+      style_left: font-bold
       left: $company
       right: $type
     - from: row
       left: $position
       right: $date
-    - from: p
+    - from: div
+      style: text-black
       body: $description
 
 experience:
@@ -14,6 +17,5 @@ experience:
     - from: section
       title: Experience
     - from: div
-      style: px-2
-      body:
-        - experiences
+      style: px-1 gap-2 flex flex-col
+      body: experiences
