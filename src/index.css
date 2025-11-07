@@ -3,19 +3,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+#document {
+  display: none;
+}
 @media print {
-  * {
+  #root {
     display: none;
   }
 
-  .doc,
-  .doc * {
+  #document {
     display: revert !important;
+  }
+
+  @page {
+    size: A4;
   }
 }
 
-.doc,
-.doc * {
+#document,
+#document * {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }

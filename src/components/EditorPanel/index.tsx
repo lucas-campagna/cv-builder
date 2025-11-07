@@ -38,12 +38,12 @@ function EditorPanel() {
 }
 
 const Header = ({ path }: { path: string | null }) => (
-  <Breadcrumb>
+  <Breadcrumb className="select-none">
     <BreadcrumbList>
       {path?.split("/").map((part, index, arr) => (
         <BreadcrumbItem key={index}>
           {index < arr.length - 1 ? (
-            <BreadcrumbLink href="#">{part}</BreadcrumbLink>
+            <BreadcrumbLink>{part}</BreadcrumbLink>
           ) : (
             <BreadcrumbPage>{part}</BreadcrumbPage>
           )}
