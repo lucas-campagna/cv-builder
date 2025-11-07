@@ -1,5 +1,6 @@
 import * as yaml from "js-yaml";
 import React from "react";
+import { varRegEx } from "./parsers/utils";
 
 export type Root = Record<string, any>;
 type PropertyType =
@@ -18,7 +19,6 @@ type PropertyType =
 // }
 type ComponentBuilder = (props?: PropertyType) => React.ReactNode;
 
-const varRegEx = /\$(\w+)/g;
 const createElement = React.createElement;
 
 const normalizeProps = (props?: PropertyType): Exclude<PropertyType, string> =>

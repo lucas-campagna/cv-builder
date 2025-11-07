@@ -27,3 +27,5 @@ const HTMLTAGS = [
   "pre",
 ]
 export const isHtmlTag = (name: string) => HTMLTAGS.includes(name);
+
+export const varRegEx = /\$(\w+)/g;

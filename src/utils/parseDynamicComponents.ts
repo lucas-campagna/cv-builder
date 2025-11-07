@@ -1,3 +1,4 @@
+import { varRegEx } from '@/core/parsers/utils';
 import * as yaml from 'js-yaml';
 import * as React from 'react';
 import { type JSX } from 'react';
@@ -12,8 +13,6 @@ interface ComponentProperties {
 export interface ComponentBuilder {
   [key: string]: (props: Record<string, unknown>) => JSX.Element;
 }
-
-const varRegEx = /\$(\w+)/g;
 
 const invalidCompNames = new Set(['color', 'size', 'text', 'id', 'style', 'body', 'from', 'class', 'className', 'key', 'ref', 'children', 'prop1', 'prop2', 'value', 'a', 'ss', 's1', 's2', 's3', 'data-testid', 'first', 'second', 'jesus', 'christ', 'pContent', 'h2Content', 'spanContent', 'divContent']);
 

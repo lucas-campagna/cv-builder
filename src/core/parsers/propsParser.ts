@@ -1,6 +1,6 @@
 import type { ComponentProps, PropsType } from "./types";
+import { varRegEx } from "./utils";
 
-const varRegEx = /\$(\w+)/g;
 const parse = (
   target: ComponentProps,
   values: PropsType = {}
