@@ -1,0 +1,4 @@
+li:
+  from: div
+  style: ml-2
+  body: • $body

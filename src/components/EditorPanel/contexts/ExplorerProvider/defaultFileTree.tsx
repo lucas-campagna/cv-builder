@@ -4,7 +4,7 @@ import document from "@/assets/defaultDocuments/document.yml?raw";
 import education from "@/assets/defaultDocuments/components/education.yml?raw";
 import headline from "@/assets/defaultDocuments/components/headline.yml?raw";
 import experience from "@/assets/defaultDocuments/components/experience.yml?raw";
-import bulletPoint from "@/assets/defaultDocuments/components/ui/bulletPoint.yml?raw";
+import li from "@/assets/defaultDocuments/components/ui/li.yml?raw";
 import row from "@/assets/defaultDocuments/components/ui/row.yml?raw";
 import section from "@/assets/defaultDocuments/components/ui/section.yml?raw";
 
@@ -14,7 +14,7 @@ const defaultFileTree: FileTree = {
   "components/education.yml": education,
   "components/headline.yml": headline,
   "components/experience.yml": experience,
-  "components/ui/bulletPoint.yml": bulletPoint,
+  "components/ui/li.yml": li,
   "components/ui/row.yml": row,
   "components/ui/section.yml": section,
 }
