@@ -3,12 +3,22 @@ import useAppState from "@/hooks/useAppState";
 import useDynamicComponents from "@/hooks/useDynamicComponents";
 import { renderToString } from "react-dom/server";
 import { createPortal } from "react-dom";
+import { useEffect } from "react";
 
 const Document = () => {
   const { isDebugging } = useAppState();
   const { Document } = useDynamicComponents();
   const DocumentPortal = () =>
     createPortal(<Document />, document.getElementById("document")!);
+
+  useEffect(() => {
+    // Refresh lucide icons after each render
+    if (typeof window !== "undefined" && (window as any).lucide) {
+      try {
+        (window as any).lucide.createIcons();
+      } catch {}
+    }
+  }, [Document]);
 
   return (
     <div className="bg-gray-100 h-full w-full flex justify-center items-start">
