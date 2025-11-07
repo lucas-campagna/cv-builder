@@ -7,6 +7,7 @@ import experience from "@/assets/defaultDocuments/components/experience.yml?raw"
 import li from "@/assets/defaultDocuments/components/ui/li.yml?raw";
 import row from "@/assets/defaultDocuments/components/ui/row.yml?raw";
 import section from "@/assets/defaultDocuments/components/ui/section.yml?raw";
+import icons from "@/assets/defaultDocuments/components/icons.yml?raw";
 
 const defaultFileTree: FileTree = {
   "main.yml": main,
@@ -17,6 +18,7 @@ const defaultFileTree: FileTree = {
   "components/ui/li.yml": li,
   "components/ui/row.yml": row,
   "components/ui/section.yml": section,
+  "components/icons.yml": icons,
 }
 
 export default defaultFileTree;

@@ -1,0 +1,16 @@
+base_icon:
+  from: i
+  data-lucide: $icon
+  style: inline-block w-3 h-3 mr-1
+
+linkedin_icon:
+  from: base_icon
+  icon: linkedin
+
+github_icon:
+  from: base_icon
+  icon: github
+
+email_icon:
+  from: base_icon
+  icon: mail
