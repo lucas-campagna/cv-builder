@@ -1,9 +1,14 @@
+document:
+  - headline
+  - experience
+  - education
+
 
 row:
   style: flex justify-between
   body:
-    - $left
-    - $right
+    - div: $left
+    - div: $right
 
 bulletPoint:
   from: li
@@ -39,6 +44,17 @@ $headline:
       - div: $github
       - div: $linkedin
 
+$educations:
+  body:
+    - from: row
+      left: $college
+      right: $date
+    - from: row
+      left: $course
+      right: $gpa
+    - from: p
+      body: $description
+
 experience:
   body:
     - from: section
@@ -56,17 +72,6 @@ education:
       style: px-2
       body:
         - educations
-
-$educations:
-  body:
-    - from: row
-      left: $college
-      right: $date
-    - from: row
-      left: $course
-      right: $gpa
-    - from: p
-      body: $description
 
 headline:
   name: Lucas Prett Campagna
@@ -109,11 +114,3 @@ asdasd
 asddsa
 asdasd
 '
-
-
-cv:
-  - headline
-  - experience
-  - education
-
-
