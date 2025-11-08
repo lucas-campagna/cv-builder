@@ -102,7 +102,7 @@ function EditorPanel() {
         </div>
       </header>
       <SidebarProvider>
-        <AppSidebar className="mt-8" />
+        <AppSidebar className="mt-8 h-[calc(100%-8)]" />
         <SidebarInset>
           <header className="flex justify-between items-center border-b px-4 h-10">
             <div className="flex h-16 items-center gap-2">
