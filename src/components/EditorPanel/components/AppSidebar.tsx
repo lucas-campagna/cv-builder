@@ -57,9 +57,8 @@ const parsePaths = (paths: string[], root: string = ""): TreeItem[] =>
     });
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { fileTree } = useExplorer();
+  const { fileTree, addFile } = useExplorer();
   const tree = parsePaths(Object.keys(fileTree));
-  const { addFile } = useExplorer();
   const items = [
     { label: "New", onClick: () => addFile() },
     { label: "Rename" },
