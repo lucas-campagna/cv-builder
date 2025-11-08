@@ -60,15 +60,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { fileTree } = useExplorer();
   const tree = parsePaths(Object.keys(fileTree));
   const { addFile } = useExplorer();
+  const items = [
+    { label: "New", onClick: () => addFile() },
+    { label: "Rename" },
+    { label: "Copy" },
+    { label: "Delete" },
+  ];
   return (
-    <OptionMenu
-      items={[
-        { label: "New", onClick: () => addFile() },
-        { label: "Rename" },
-        { label: "Copy" },
-        { label: "Delete" },
-      ]}
-    >
+    <OptionMenu items={items}>
       <Sidebar {...props}>
         <SidebarContent>
           <SidebarGroup>
@@ -101,20 +100,22 @@ function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
       setIsRenaming(false);
     }
   };
+  const items = [
+    { label: "New", onClick: () => addFile() },
+    { label: "Rename", onClick: () => setIsRenaming(true) },
+    {
+      label: "Copy",
+      onClick: () => {
+        copyFile(path);
+        setIsRenaming(true);
+      },
+    },
+    { label: "Delete", onClick: () => rmFile(path) },
+  ];
 
   if (isFile && path) {
     return (
-      <OptionMenu
-        items={[
-          { label: "New", onClick: () => addFile() },
-          { label: "Rename", onClick: () => setIsRenaming(true) },
-          { label: "Copy", onClick: () => {
-            copyFile(path);
-            setIsRenaming(true);
-          } },
-          { label: "Delete", onClick: () => rmFile(path) },
-        ]}
-      >
+      <OptionMenu items={items}>
         <SidebarMenuButton
           isActive={path === selectedFile}
           className="data-[active=true]:bg-transparent"
