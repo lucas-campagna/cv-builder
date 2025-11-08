@@ -64,7 +64,7 @@ function EditorPanel() {
     { icon: Save, tooltip: "Save (Ctrl+S)", action: handleSave },
     {
       icon: Download,
-      tooltip: "Generate PDF",
+      tooltip: "Generate PDF (Ctrl+P)",
       action: () => (window as any).print(),
     },
     {
