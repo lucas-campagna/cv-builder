@@ -80,18 +80,18 @@ test("testing deep inheritance", () => {
 test("testing style inheritance", () => {
   const box = {
     from: "box1",
-    ss: "width-[20px]",
+    style: "width-[20px]",
   };
   const box1 = {
     from: "div",
-    style: "$ss",
+    style: "bg-red-100 $style",
     body: "My Box",
   };
   const components = { box1, box };
   const boxParsed = buildComponent("box", components);
   expect(boxParsed()).toEqual({
     from: "div",
-    style: "width-[20px]",
+    style: "bg-red-100 width-[20px]",
     body: "My Box",
   });
 });
