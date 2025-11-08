@@ -24,6 +24,7 @@ const defaultExplorerContext = {
   rmFile: (_: Path) => {},
   renameFile: (_: Path, __: Path) => {},
   updateFileContent: (_: string) => {},
+  copyFile: (_: string) => {},
 };
 
 export const ExplorerContext = createContext(defaultExplorerContext);
@@ -39,7 +40,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       let fileName = `${DEFAULT_FILE_NAME}.yml`;
       let counter = 1;
       while (true) {
-        const exists = state.fileTree[fileName];
+        const exists = fileName in state.fileTree;
         if (!exists) return fileName;
         fileName = `${DEFAULT_FILE_NAME}-${counter}.yml`;
         counter++;
@@ -102,6 +103,22 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const copyFile = (path: string) => {
+    if (!(path in state.fileTree)) return;
+    setState((prevState) => {
+      const [name, ext] = path.split(".");
+      const newFileName = `${name}-copy.${ext}`;
+      return {
+        ...prevState,
+        fileTree: {
+          ...prevState.fileTree,
+          [newFileName]: prevState.fileTree[path],
+        },
+        selectedFile: newFileName,
+      };
+    });
+  };
+
   return (
     <ExplorerContext.Provider
       value={{
@@ -111,6 +128,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         rmFile,
         renameFile,
         updateFileContent,
+        copyFile,
       }}
     >
       {children}

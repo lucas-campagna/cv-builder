@@ -19,6 +19,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useExplorer } from "../hooks/useExplorer";
+import OptionMenu from "../../OptionMenu";
+import { Input } from "@/components/ui/input";
 
 type TreeItem = {
   name: string;
@@ -57,22 +59,32 @@ const parsePaths = (paths: string[], root: string = ""): TreeItem[] =>
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { fileTree } = useExplorer();
   const tree = parsePaths(Object.keys(fileTree));
+  const { addFile } = useExplorer();
   return (
-    <Sidebar {...props}>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Files</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {tree.map((item, index) => (
-                <Tree key={index} item={item} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarRail />
-    </Sidebar>
+    <OptionMenu
+      items={[
+        { label: "New", onClick: () => addFile() },
+        { label: "Rename" },
+        { label: "Copy" },
+        { label: "Delete" },
+      ]}
+    >
+      <Sidebar {...props}>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Files</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {tree.map((item, index) => (
+                  <Tree key={index} item={item} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarRail />
+      </Sidebar>
+    </OptionMenu>
   );
 }
 
@@ -80,26 +92,53 @@ function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
   const { name, path, children: fileTree } = item;
   const tree = parsePaths(fileTree, joinPath(root, name));
   const isFile = fileTree.length === 0;
-  const { selectFile, selectedFile } = useExplorer();
+  const { selectFile, selectedFile, addFile, rmFile, renameFile, copyFile } =
+    useExplorer();
+  const [isRenaming, setIsRenaming] = React.useState(false);
+  const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      renameFile(path, e.currentTarget.value);
+      setIsRenaming(false);
+    }
+  };
 
   if (isFile && path) {
     return (
-      <SidebarMenuButton
-        isActive={path === selectedFile}
-        className="data-[active=true]:bg-transparent"
-        onClick={() => selectFile(path)}
+      <OptionMenu
+        items={[
+          { label: "New", onClick: () => addFile() },
+          { label: "Rename", onClick: () => setIsRenaming(true) },
+          { label: "Copy", onClick: () => {
+            copyFile(path);
+            setIsRenaming(true);
+          } },
+          { label: "Delete", onClick: () => rmFile(path) },
+        ]}
       >
-        <File />
-        {name}
-      </SidebarMenuButton>
+        <SidebarMenuButton
+          isActive={path === selectedFile}
+          className="data-[active=true]:bg-transparent"
+          onClick={() => selectFile(path)}
+        >
+          <File />
+          {isRenaming ? (
+            <Input
+              autoFocus
+              defaultValue={name}
+              onKeyDown={handleRename}
+              onBlur={() => setIsRenaming(false)}
+            />
+          ) : (
+            name
+          )}
+        </SidebarMenuButton>
+      </OptionMenu>
     );
   }
 
   return (
     <SidebarMenuItem>
-      <Collapsible
-        className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-      >
+      <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton>
             <ChevronRight className="transition-transform" />
