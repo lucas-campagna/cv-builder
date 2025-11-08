@@ -30,7 +30,7 @@ import useHotkey from "@/hooks/useHotkey";
 
 function EditorPanel() {
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
-  const { updateFileContent, selectedFile } = useExplorer();
+  const { selectedFile } = useExplorer();
 
   function handleSave() {
     alert("Save triggered");
@@ -116,7 +116,7 @@ function EditorPanel() {
               <Header path={selectedFile} />
             </div>
           </header>
-          <Editor onChange={updateFileContent} />,
+          <Editor />,
         </SidebarInset>
       </SidebarProvider>
     </div>
