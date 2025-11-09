@@ -622,3 +622,39 @@ experiences:
 ```
 
 This system provides a powerful, flexible way to create complex UI components using simple YAML syntax, with support for inheritance, templating, and dynamic content generation.
+
+## Accessing Documentation in Code
+
+You can fetch documentation content programmatically using the built-in documentation system:
+
+### Using the useDocumentation Hook
+
+```typescript
+import { useDocumentation } from '../hooks/useDocumentation';
+
+const MyComponent = () => {
+  const { content, loading, error } = useDocumentation('yaml-component-system.md');
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  
+  return (
+    <MonacoEditor
+      height="100%"
+      language="markdown"
+      theme="vs-light"
+      value={content}
+      options={{ readOnly: true }}
+    />
+  );
+};
+```
+
+### Available Documentation Files
+
+- `yaml-component-system.md` - Complete YAML component system documentation
+- Additional docs can be added to the `docs/` folder
+
+### Keyboard Shortcuts
+
+- `Ctrl+D` - Toggle documentation viewer in the editor panel

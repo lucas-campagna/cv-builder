@@ -68,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <OptionMenu items={items}>
       <Sidebar {...props}>
-        <SidebarContent>
+        <SidebarContent className="flex flex-col justify-between">
           <SidebarGroup>
             <SidebarGroupLabel>Files</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -76,6 +76,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {tree.map((item, index) => (
                   <Tree key={index} item={item} />
                 ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Changes</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {/* <Tree key={index} item={item} /> */}
+                {/* {tree.map((item, index) => (
+                  <Tree key={index} item={item} />
+                ))} */}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
