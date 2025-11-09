@@ -39,7 +39,10 @@ function EditorPanel() {
     alert("Open Document triggered");
   }
   function handleOpenHelp() {
-    alert("Help triggered");
+    (window as any).open(
+      "https://github.com/lucas-campagna/cv-builder/blob/main/docs/yaml-component-system.md#yaml-component-system-documentation",
+      "_blank"
+    );
   }
 
   useHotkey({
