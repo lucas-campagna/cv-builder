@@ -31,7 +31,7 @@ import { HELP_PAGE_URL } from "@/constants";
 
 function EditorPanel() {
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
-  const { selectedFile } = useExplorer();
+  const { selectedFile, currentSessionName } = useExplorer();
 
   function handleSave() {
     alert("Save triggered");
@@ -85,6 +85,7 @@ function EditorPanel() {
             </Tooltip>
           ))}
         </div>
+        <span className="select-none text-gray-500">{currentSessionName}</span>
         <div className="flex gap-2">
           <Tooltip tooltip="Font Size">
             <Input

@@ -10,6 +10,7 @@ export type Path = string;
 export type FileTree = { [key: Path]: string };
 
 export interface ExplorerState {
+  currentSessionName: any;
   selectedFile: Path | null;
   fileTree: FileTree;
 }
@@ -19,12 +20,16 @@ const DEFAULT_FILE_NAME = "new-file";
 const defaultExplorerContext = {
   selectedFile: "main.yml" as string | null,
   fileTree: defaultFileTree as FileTree,
+  currentSessionName: "default-session" as string,
   selectFile: (_: Path) => {},
   addFile: () => {},
   rmFile: (_: Path) => {},
   renameFile: (_: Path, __: Path) => {},
   updateFileContent: (_: string) => {},
   copyFile: (_: string) => {},
+  saveSession: () => {},
+  loadSession: (_: string) => {},
+  deleteSession: (_: string) => {},
 };
 
 export const ExplorerContext = createContext(defaultExplorerContext);
@@ -33,7 +38,32 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<ExplorerState>({
     fileTree: defaultExplorerContext.fileTree,
     selectedFile: defaultExplorerContext.selectedFile,
+    currentSessionName: defaultExplorerContext.currentSessionName,
   });
+
+  const saveSession = () => {
+    localStorage.setItem(
+      `explorer-session-${state.currentSessionName}`,
+      JSON.stringify(state.fileTree)
+    );
+  };
+
+  const loadSession = (sessionName: string) => {
+    const sessionData = localStorage.getItem(`explorer-session-${sessionName}`);
+    if (sessionData) {
+      const fileTree = JSON.parse(sessionData) as FileTree;
+      setState((prevState) => ({
+        ...prevState,
+        fileTree,
+        selectedFile: Object.keys(fileTree)[0] || null,
+        currentSessionName: sessionName,
+      }));
+    }
+  };
+
+  const deleteSession = (sessionName: string) => {
+    localStorage.removeItem(`explorer-session-${sessionName}`);
+  };
 
   const addFile = () => {
     const newFileName = (() => {
@@ -129,6 +159,9 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         renameFile,
         updateFileContent,
         copyFile,
+        saveSession,
+        loadSession,
+        deleteSession,
       }}
     >
       {children}
