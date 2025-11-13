@@ -27,6 +27,7 @@ import useAppState from "@/hooks/useAppState";
 import Tooltip from "../Tooltip";
 import { Input } from "../ui/input";
 import useHotkey from "@/hooks/useHotkey";
+import { HELP_PAGE_URL } from "@/constants";
 
 function EditorPanel() {
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
@@ -39,10 +40,7 @@ function EditorPanel() {
     alert("Open Document triggered");
   }
   function handleOpenHelp() {
-    (window as any).open(
-      "https://github.com/lucas-campagna/cv-builder/blob/main/docs/yaml-component-system.md#yaml-component-system-documentation",
-      "_blank"
-    );
+    (window as any).open(HELP_PAGE_URL, "_blank");
   }
 
   useHotkey({
