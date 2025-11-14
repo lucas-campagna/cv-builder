@@ -28,16 +28,21 @@ import Tooltip from "../Tooltip";
 import { Input } from "../ui/input";
 import useHotkey from "@/hooks/useHotkey";
 import { HELP_PAGE_URL } from "@/constants";
+import SessionsDialog from "./components/SessionsDialog";
+import { useState } from "react";
 
 function EditorPanel() {
+  const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
-  const { selectedFile, currentSessionName } = useExplorer();
+  const { selectedFile, currentSessionName, saveSession, renameSession } =
+    useExplorer();
+  const [newName, setNewName] = useState<string | null>(null);
 
   function handleSave() {
-    alert("Save triggered");
+    confirm("Do you want to save the current session?") && saveSession();
   }
   function handleOpenDocument() {
-    alert("Open Document triggered");
+    setSessionDialogOpen(true);
   }
   function handleOpenHelp() {
     (window as any).open(HELP_PAGE_URL, "_blank");
@@ -85,7 +90,39 @@ function EditorPanel() {
             </Tooltip>
           ))}
         </div>
-        <span className="select-none text-gray-500">{currentSessionName}</span>
+        <div>
+          {newName !== null ? (
+            <Input
+              type="text"
+              value={newName}
+              className="h-6 p-1 text-xs bg-white"
+              onChange={(e) => setNewName(e.target.value)}
+              onBlur={() => {
+                setNewName(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  renameSession(newName);
+                  setNewName(null);
+                }
+              }}
+              autoFocus
+            />
+          ) : (
+            <span
+              className="select-none text-gray-500"
+              onClick={() => setNewName(currentSessionName)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setNewName(currentSessionName);
+                }
+              }}
+              tabIndex={0}
+            >
+              {currentSessionName}
+            </span>
+          )}
+        </div>
         <div className="flex gap-2">
           <Tooltip tooltip="Font Size">
             <Input
@@ -121,6 +158,12 @@ function EditorPanel() {
           <Editor />,
         </SidebarInset>
       </SidebarProvider>
+      {sessionDialogOpen && (
+        <SessionsDialog
+          open={sessionDialogOpen}
+          onOpenChange={setSessionDialogOpen}
+        />
+      )}
     </div>
   );
 }

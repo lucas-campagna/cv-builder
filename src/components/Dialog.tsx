@@ -14,22 +14,30 @@ const Dialog = ({
   children,
   title,
   description,
+  body,
   cancel,
   action,
+  ...props
 }: {
-  children: React.ReactNode;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  cancel?: React.ReactNode;
-  action?: React.ReactNode;
-}) => (
-  <AlertDialog>
+  children?: React.ReactNode;
+  title?: string;
+  description?: string;
+  body?: React.ReactNode;
+  cancel?: string;
+  action?: string;
+} & React.ComponentProps<typeof AlertDialog>) => (
+  <AlertDialog {...props}>
     <AlertDialogTrigger>{children}</AlertDialogTrigger>
     <AlertDialogContent>
       {(title || description) && (
         <AlertDialogHeader>
           {title && <AlertDialogTitle>{title}</AlertDialogTitle>}
-          {description && (
+          {body ? (
+            <>
+              {body}
+              <AlertDialogDescription />
+            </>
+          ) : (
             <AlertDialogDescription>{description}</AlertDialogDescription>
           )}
         </AlertDialogHeader>
