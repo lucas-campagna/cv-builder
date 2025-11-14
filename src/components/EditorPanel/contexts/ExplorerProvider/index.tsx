@@ -1,5 +1,5 @@
 import { createContext, useEffect, useMemo, useState } from "react";
-import defaultFileTree from "./defaultFileTree";
+import defaultExplorer from "./defaultExplorer";
 
 export interface FileNode {
   path: string;
@@ -7,12 +7,17 @@ export interface FileNode {
 }
 
 export type Path = string;
-export type FileTree = { [key: Path]: string };
+export type Explorer = {
+  id: string;
+  name: string;
+  path: string[];
+  content: string;
+};
 
 export interface ExplorerState {
   currentSessionName: any;
-  selectedFile: Path | null;
-  fileTree: FileTree;
+  selectedFileIndex: number;
+  fileTree: Explorer[];
   renamingFile: string | null;
 }
 
@@ -34,8 +39,8 @@ example_of_component:
 `;
 
 const defaultExplorerContext = {
-  selectedFile: DEFAULT_SELECTED_FILE as string | null,
-  fileTree: defaultFileTree as FileTree,
+  selectedFileIndex: 0,
+  fileTree: defaultExplorer as Explorer[],
   currentSessionName: DEFAULT_SESSION as string,
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
@@ -59,18 +64,23 @@ export const ExplorerContext = createContext(defaultExplorerContext);
 const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<ExplorerState>({
     fileTree: defaultExplorerContext.fileTree,
-    selectedFile: defaultExplorerContext.selectedFile,
+    selectedFileIndex: defaultExplorerContext.selectedFileIndex,
     currentSessionName: defaultExplorerContext.currentSessionName,
     renamingFile: defaultExplorerContext.renamingFile,
   });
 
   const newSession = (sessionName: string) => {
-    const fileTree = {
-      [DEFAULT_SELECTED_FILE]: DEFAULT_MAIN_FILE_CONTENT,
-    };
+    const fileTree = [
+      {
+        id: crypto.randomUUID(),
+        name: DEFAULT_SELECTED_FILE,
+        path: [],
+        content: DEFAULT_MAIN_FILE_CONTENT,
+      },
+    ];
     setState({
       fileTree,
-      selectedFile: DEFAULT_SELECTED_FILE,
+      selectedFileIndex: 0,
       currentSessionName: sessionName,
       renamingFile: null,
     });
@@ -93,11 +103,11 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const loadSession = (sessionName: string) => {
     const sessionData = localStorage.getItem(`explorer-session-${sessionName}`);
     if (sessionData) {
-      const fileTree = JSON.parse(sessionData) as FileTree;
+      const fileTree = JSON.parse(sessionData) as Explorer[];
       setState((prevState) => ({
         ...prevState,
         fileTree,
-        selectedFile: Object.keys(fileTree)[0] || null,
+        selectedFileIndex: 0,
         currentSessionName: sessionName,
       }));
     }
@@ -134,74 +144,80 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     })();
     setState((prevState) => ({
       ...prevState,
-      fileTree: {
+      fileTree: [
         ...prevState.fileTree,
-        [newFileName]: "",
-      },
-      selectedFile: newFileName,
+        { id: crypto.randomUUID(), name: newFileName, path: [], content: "" },
+      ],
+      selectedFileIndex: -1,
     }));
   };
 
-  const rmFile = (path: string) => {
+  const rmFile = (id: string) => {
     setState((prevState) => {
-      const newFileTree = { ...prevState.fileTree };
-      delete newFileTree[path];
+      const newFileTree = prevState.fileTree.filter(
+        ({ id: fileId }) => fileId !== id
+      );
       return {
         ...prevState,
         fileTree: newFileTree,
-        selectedFile:
-          prevState.selectedFile === path ? null : prevState.selectedFile,
+        selectedFileIndex:
+          prevState.fileTree[prevState.selectedFileIndex]?.id === id
+            ? 0
+            : prevState.selectedFileIndex,
       };
     });
   };
 
-  const selectFile = (path: string) => {
+  const selectFile = (id: string) => {
     setState((prevState) => ({
       ...prevState,
-      selectedFile: prevState.fileTree[path] ? path : prevState.selectedFile,
+      selectedFileIndex: (() => {
+        const index = prevState.fileTree.findIndex((file) => file.id === id);
+        return index !== -1 ? index : prevState.selectedFileIndex;
+      })(),
     }));
   };
 
-  const renameFile = (oldPath: string, newPath: string) => {
+  const renameFile = (id: string, name: string) => {
     stopRenaming();
-    setState((prevState) => {
-      const newFileTree = { ...prevState.fileTree };
-      newFileTree[newPath] = newFileTree[oldPath];
-      delete newFileTree[oldPath];
-      return {
-        ...prevState,
-        fileTree: newFileTree,
-        selectedFile:
-          prevState.selectedFile === oldPath ? newPath : prevState.selectedFile,
-      };
-    });
+    setState((prevState) => ({
+      ...prevState,
+      fileTree: prevState.fileTree.map((file) => {
+        if (file.id === id) {
+          file.name = name;
+        }
+        return file;
+      }),
+    }));
   };
 
-  const updateFileContent = (content: string) => {
-    setState((prevState) => {
-      if (!prevState.selectedFile) return prevState;
-      return {
-        ...prevState,
-        fileTree: {
-          ...prevState.fileTree,
-          [prevState.selectedFile]: content,
+  const updateSelectedFileContent = (content: string) => {
+    setState((prevState) => ({
+      ...prevState,
+      fileTree: [
+        ...prevState.fileTree.slice(0, prevState.selectedFileIndex),
+        {
+          ...prevState.fileTree[prevState.selectedFileIndex],
+          content,
         },
-      };
-    });
+        ...prevState.fileTree.slice(prevState.selectedFileIndex + 1),
+      ],
+    }));
   };
 
-  const copyFile = (path: string) => {
-    if (!(path in state.fileTree)) return;
+  const copyFile = (id: string) => {
     setState((prevState) => {
-      const [name, ext] = path.split(".");
-      const newFileName = `${name}-copy.${ext}`;
+      const file = state.fileTree.find((f) => f.id === id);
+      if (!file) return prevState;
+      const ext = file.name.split(".").pop();
+      const newFileName = `${file.name}-copy.${ext}`;
       return {
         ...prevState,
-        fileTree: {
+        fileTree: [
           ...prevState.fileTree,
-          [newFileName]: prevState.fileTree[path],
-        },
-        selectedFile: newFileName,
+          { ...file, id: crypto.randomUUID(), name: newFileName },
+        ],
+        selectedFileIndex: state.fileTree.length,
       };
     });
   };
@@ -242,7 +258,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         addFile,
         rmFile,
         renameFile,
-        updateFileContent,
+        updateFileContent: updateSelectedFileContent,
         copyFile,
         newSession,
         saveSession,
