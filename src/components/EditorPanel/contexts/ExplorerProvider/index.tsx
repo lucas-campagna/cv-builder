@@ -13,6 +13,7 @@ export interface ExplorerState {
   currentSessionName: any;
   selectedFile: Path | null;
   fileTree: FileTree;
+  renamingFile: string | null;
 }
 
 const DEFAULT_FILE_NAME = "new-file";
@@ -36,6 +37,8 @@ const defaultExplorerContext = {
   selectedFile: DEFAULT_SELECTED_FILE as string | null,
   fileTree: defaultFileTree as FileTree,
   currentSessionName: DEFAULT_SESSION as string,
+  renamingFile: "" as string | null,
+  sessionNames: [] as string[],
   selectFile: (_: Path) => {},
   addFile: () => {},
   rmFile: (_: Path) => {},
@@ -47,7 +50,8 @@ const defaultExplorerContext = {
   loadSession: (_: string) => {},
   deleteSession: (_: string) => {},
   renameSession: (_: string) => {},
-  sessionNames: [] as string[],
+  startRenaming: (_: string | null) => {},
+  stopRenaming: () => {},
 };
 
 export const ExplorerContext = createContext(defaultExplorerContext);
@@ -57,6 +61,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     fileTree: defaultExplorerContext.fileTree,
     selectedFile: defaultExplorerContext.selectedFile,
     currentSessionName: defaultExplorerContext.currentSessionName,
+    renamingFile: defaultExplorerContext.renamingFile,
   });
 
   const newSession = (sessionName: string) => {
@@ -67,6 +72,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       fileTree,
       selectedFile: DEFAULT_SELECTED_FILE,
       currentSessionName: sessionName,
+      renamingFile: null,
     });
     localStorage.setItem(
       `explorer-session-${sessionName}`,
@@ -157,6 +163,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const renameFile = (oldPath: string, newPath: string) => {
+    stopRenaming();
     setState((prevState) => {
       const newFileTree = { ...prevState.fileTree };
       newFileTree[newPath] = newFileTree[oldPath];
@@ -213,6 +220,15 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     return sessions;
   }, [state]);
 
+  const startRenaming = (path: string | null) => {
+    setState((prevState) => ({
+      ...prevState,
+      renamingFile: path,
+    }));
+  };
+
+  const stopRenaming = () => setState((s) => ({ ...s, renamingFile: null }));
+
   useEffect(() => {
     saveSession();
   }, []);
@@ -233,6 +249,8 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         loadSession,
         deleteSession,
         renameSession,
+        startRenaming,
+        stopRenaming,
       }}
     >
       {children}

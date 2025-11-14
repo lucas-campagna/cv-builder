@@ -21,6 +21,8 @@ import {
 import { useExplorer } from "../hooks/useExplorer";
 import OptionMenu from "../../OptionMenu";
 import { Input } from "@/components/ui/input";
+import useHotkeys from "@/hooks/useHotkeys";
+import { useEffect } from "react";
 
 type TreeItem = {
   name: string;
@@ -101,27 +103,58 @@ function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
   const { name, path, children: fileTree } = item;
   const tree = parsePaths(fileTree, joinPath(root, name));
   const isFile = fileTree.length === 0;
-  const { selectFile, selectedFile, addFile, rmFile, renameFile, copyFile } =
-    useExplorer();
-  const [isRenaming, setIsRenaming] = React.useState(false);
+  const {
+    selectFile,
+    selectedFile,
+    addFile,
+    rmFile,
+    renameFile,
+    copyFile,
+    renamingFile,
+    startRenaming,
+    stopRenaming,
+  } = useExplorer();
+  // const [isRenaming, setIsRenaming] = React.useState(false);
   const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       renameFile(path, e.currentTarget.value);
-      setIsRenaming(false);
     }
   };
+  const isRenaming = renamingFile === path;
+  const renameInputRef = React.useRef<HTMLInputElement>(null);
+  const newFile = () => {
+    addFile();
+    startRenaming(path);
+  };
   const items = [
-    { label: "New", onClick: () => addFile() },
-    { label: "Rename", onClick: () => setIsRenaming(true) },
+    {
+      label: "New",
+      onClick: newFile,
+    },
+    { label: "Rename", onClick: () => startRenaming(path) },
     {
       label: "Copy",
       onClick: () => {
         copyFile(path);
-        setIsRenaming(true);
+        startRenaming(path);
       },
     },
     { label: "Delete", onClick: () => rmFile(path) },
   ];
+
+  useHotkeys({
+    escape: stopRenaming,
+    f2: () => startRenaming(path),
+    "alt+n": newFile, // Placeholder for new file action
+  });
+
+  useEffect(() => {
+    if (isRenaming) {
+      setTimeout(() => {
+        renameInputRef.current?.select();
+      }, 200);
+    }
+  }, [isRenaming]);
 
   if (isFile && path) {
     return (
@@ -135,9 +168,11 @@ function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
           {isRenaming ? (
             <Input
               autoFocus
+              ref={renameInputRef}
+              onFocus={(e) => e.currentTarget.select()}
               defaultValue={name}
               onKeyDown={handleRename}
-              onBlur={() => setIsRenaming(false)}
+              onBlur={() => stopRenaming()}
             />
           ) : (
             name
