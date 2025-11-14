@@ -12,24 +12,29 @@ const Editor = () => {
   else if (language === "yml") language = "yaml";
 
   const showDiff = false;
-  const Editor = showDiff ? DiffEditor : MonacoEditor;
-  const props = showDiff
-    ? {
-        options: {
+  const Editor = (...props: any) =>
+    showDiff ? (
+      <DiffEditor
+        {...props}
+        options={{
           readOnly: true,
           renderSideBySide: true,
-        },
-        original: code,
-        modified: "",
-      }
-    : {
-        onChange: (txt: string | undefined) => txt && updateFileContent(txt),
-        value: code,
-      };
+        }}
+        original={code}
+        modified=""
+      />
+    ) : (
+      <MonacoEditor
+        {...props}
+        onChange={(txt: string | undefined) => txt && updateFileContent(txt)}
+        value={code}
+        c
+      />
+    );
 
   return (
-    <div className="w-full m-0 text-[16px]">
-      <Editor height="100vh" language={language} theme="light" {...props} />
+    <div className="h-full w-full m-0 text-[16px]">
+      <Editor height="100vh" language={language} theme="light" />
     </div>
   );
 };
