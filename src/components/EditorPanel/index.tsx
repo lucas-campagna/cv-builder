@@ -26,7 +26,7 @@ import {
 import useAppState from "@/hooks/useAppState";
 import Tooltip from "../Tooltip";
 import { Input } from "../ui/input";
-import useHotkey from "@/hooks/useHotkey";
+import useHotkeys from "@/hooks/useHotkeys";
 import { HELP_PAGE_URL } from "@/constants";
 import SessionsDialog from "./components/SessionsDialog";
 import { useState } from "react";
@@ -48,17 +48,10 @@ function EditorPanel() {
     (window as any).open(HELP_PAGE_URL, "_blank");
   }
 
-  useHotkey({
-    hotkey: "ctrl+o",
-    callback: handleOpenDocument,
-  });
-  useHotkey({
-    hotkey: "ctrl+s",
-    callback: handleSave,
-  });
-  useHotkey({
-    hotkey: "ctrl+?",
-    callback: handleOpenHelp,
+  useHotkeys({
+    "ctrl+o": handleOpenDocument,
+    "ctrl+s": handleSave,
+    "ctrl+?": handleOpenHelp,
   });
 
   const headerIcons = [
