@@ -9,15 +9,16 @@ export const useExplorer = () => {
   if (!context) {
     throw new Error("useExplorer must be used within an ExplorerProvider");
   }
-  const fileContent =
-    context.selectedFile && context.selectedFile in context.fileTree
-      ? context.fileTree[context.selectedFile]
-      : null;
+  const fileContent = context.fileTree.find(
+    (f) => f.id === context.selectedFile?.id
+  )?.content ?? '';
   useDebounced(
     {
       delay: 100,
-      func: () => {
-        const allContent = Object.values(context.fileTree).join("\n\n");
+      callback: () => {
+        const allContent = Object.values(
+          context.fileTree.map(({ content }) => content)
+        ).join("\n\n");
         update(allContent);
       },
     },

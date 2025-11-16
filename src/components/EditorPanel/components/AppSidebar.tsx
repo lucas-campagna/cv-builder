@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronRight, File, Folder } from "lucide-react";
+import { ChevronRight, File as FileIcon, Folder } from "lucide-react";
 
 import {
   Collapsible,
@@ -21,52 +21,39 @@ import {
 import { useExplorer } from "../hooks/useExplorer";
 import OptionMenu from "../../OptionMenu";
 import { Input } from "@/components/ui/input";
+import { type File } from "../contexts/ExplorerProvider";
 import useHotkeys from "@/hooks/useHotkeys";
 import { useEffect } from "react";
 
-type TreeItem = {
-  name: string;
-  path: string;
-  children: string[];
-};
-
-const joinPath = (...parts: string[]): string =>
-  parts.filter(Boolean).join("/");
-
-const parsePaths = (paths: string[], root: string = ""): TreeItem[] =>
-  Object.entries(
-    paths.reduce((acc, fullPath) => {
-      const [origin, ...parts] = fullPath.split("/");
-      return {
-        ...acc,
-        [origin]: {
-          path: joinPath(root, fullPath),
-          children: [
-            ...(acc?.[origin]?.children || []),
-            ...(parts.length ? [joinPath(...parts)] : []),
-          ],
-        },
-      };
-    }, {} as Record<string, Omit<TreeItem, "name">>)
-  )
-    .map(([name, props]) => ({ name, ...props } as TreeItem))
-    .sort((a, b) => {
-      const aIsFile = a.children.length === 0;
-      const bIsFile = b.children.length === 0;
-      if (aIsFile && !bIsFile) return 1;
-      if (!aIsFile && bIsFile) return -1;
-      return a.name.localeCompare(b.name);
-    });
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { addFile } = useExplorer();
-  // const tree = parsePaths(Object.keys(fileTree));
+  const {
+    addFile,
+    selectedFile,
+    stopRenaming,
+    startRenaming,
+    copyFile,
+    rmFile,
+  } = useExplorer();
+  const rename = () => selectedFile && startRenaming(selectedFile.id);
+  const copy = () => selectedFile && copyFile(selectedFile.id);
+  const rm = () => selectedFile && rmFile(selectedFile.id);
+  const newFile = () => {
+    addFile();
+    rename();
+  };
   const items = [
-    { label: "New", onClick: () => addFile() },
-    { label: "Rename" },
-    { label: "Copy" },
-    { label: "Delete" },
+    { label: "New", onClick: addFile },
+    { label: "Rename", onClick: rename },
+    { label: "Copy", onclick: copy },
+    { label: "Delete", rm },
   ];
+
+  useHotkeys({
+    escape: stopRenaming,
+    f2: rename,
+    "alt+n": newFile,
+  });
+
   return (
     <OptionMenu items={items}>
       <Sidebar {...props}>
@@ -98,74 +85,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function Tree({ root = [] }: { root?: string[] }) {
-  // const { name, path, children: fileTree } = item;
-  // const tree = parsePaths(fileTree, joinPath(root, name));
-  // const isFile = fileTree.length === 0;
-  const {
-    selectFile,
-    selectedFile: selectedFile,
-    addFile,
-    rmFile,
-    renameFile,
-    copyFile,
-    renamingFile,
-    startRenaming,
-    stopRenaming,
-    fileTree,
-  } = useExplorer();
+  const { fileTree } = useExplorer();
   const files = fileTree.filter(
     (file) =>
       file.path.length === root.length &&
-      file.path.every((part, index) => part === root[index])
+      root.every((part, index) => part === file.path[index])
   );
-  const folders = fileTree.filter(
-    (file) =>
-      file.path.length > root.length &&
-      file.path.every((part, index) => part === root[index])
+  const folders = fileTree
+    .filter(
+      (file) =>
+        file.path.length > root.length &&
+        root.every((part, index) => part === file.path[index])
+    )
+    .map((folder) => folder.path.slice(0, root.length + 1).join("/"))
+    .reduce((folders, folder) => {
+      if (!folders.includes(folder)) {
+        folders.push(folder);
+      }
+      return folders;
+    }, [] as string[])
+    .map((folder) => folder.split("/"));
+
+  return (
+    <>
+      {folders.map((folder, index) => (
+        <TreeFolder root={folder} key={index} />
+      ))}
+      {files.map((file, index) => (
+        <TreeFile file={file} key={index} />
+      ))}
+    </>
   );
+}
 
-  // const [isRenaming, setIsRenaming] = React.useState(false);
-  // const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === "Enter") {
-  //     renameFile(path, e.currentTarget.value);
-  //   }
-  // };
-  // const isRenaming = renamingFile === path;
-  // const renameInputRef = React.useRef<HTMLInputElement>(null);
-  // const newFile = () => {
-  //   addFile();
-  //   startRenaming(path);
-  // };
-  // const items = [
-  //   {
-  //     label: "New",
-  //     onClick: newFile,
-  //   },
-  //   { label: "Rename", onClick: () => startRenaming(path) },
-  //   {
-  //     label: "Copy",
-  //     onClick: () => {
-  //       copyFile(path);
-  //       startRenaming(path);
-  //     },
-  //   },
-  //   { label: "Delete", onClick: () => rmFile(path) },
-  // ];
-
-  // useHotkeys({
-  //   escape: stopRenaming,
-  //   f2: () => startRenaming(path),
-  //   "alt+n": newFile, // Placeholder for new file action
-  // });
-
-  // useEffect(() => {
-  //   if (isRenaming) {
-  //     setTimeout(() => {
-  //       renameInputRef.current?.select();
-  //     }, 200);
-  //   }
-  // }, [isRenaming]);
-
+const TreeFolder = ({ root }: { root: string[] }) => {
   return (
     <SidebarMenuItem>
       <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
@@ -173,41 +126,88 @@ function Tree({ root = [] }: { root?: string[] }) {
           <SidebarMenuButton>
             <ChevronRight className="transition-transform" />
             <Folder />
-            {name}
+            {root.at(-1)}
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {tree.map((item, index) => (
-              <Tree key={index} item={item} root={joinPath(root, name)} />
-            ))}
+            <Tree root={root} />
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>
     </SidebarMenuItem>
   );
-}
+};
 
-const TreeLeaf = () => {
+const TreeFile = ({ file }: { file: File }) => {
+  const {
+    selectedFile,
+    selectFile,
+    renamingFile,
+    startRenaming,
+    stopRenaming,
+    renameFile,
+    copyFile,
+    rmFile,
+    addFile,
+  } = useExplorer();
+
+  const isRenaming = renamingFile === file.id;
+  const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      renameFile(e.currentTarget.value);
+    }
+  };
+  // const isRenaming = renamingFile === path;
+  const rename = () => startRenaming(file.id);
+  const renameInputRef = React.useRef<HTMLInputElement>(null);
+  const newFile = () => {
+    addFile();
+    rename();
+  };
+  const items = [
+    {
+      label: "New",
+      onClick: newFile,
+    },
+    { label: "Rename", onClick: () => rename() },
+    {
+      label: "Copy",
+      onClick: () => {
+        copyFile(file.id);
+        rename();
+      },
+    },
+    { label: "Delete", onClick: () => rmFile(file.id) },
+  ];
+
+  // useEffect(() => {
+  //   if (isRenaming) {
+  //     setTimeout(() => {
+  //       renameInputRef.current?.select();
+  //     }, 500);
+  //   }
+  // }, [isRenaming]);
+
   return (
     <OptionMenu items={items}>
       <SidebarMenuButton
-        isActive={path === selectedFile}
+        isActive={file.id === selectedFile?.id}
         className="data-[active=true]:bg-transparent"
-        onClick={() => selectFile(path)}
+        onClick={() => selectFile(file.id)}
       >
-        <File />
-        {isRenaming ? (
+        <FileIcon />
+        {file.id === renamingFile ? (
           <Input
             autoFocus
             ref={renameInputRef}
             onFocus={(e) => e.currentTarget.select()}
-            defaultValue={name}
+            defaultValue={file.name}
             onKeyDown={handleRename}
             onBlur={() => stopRenaming()}
           />
         ) : (
-          name
+          file.name
         )}
       </SidebarMenuButton>
     </OptionMenu>

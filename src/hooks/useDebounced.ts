@@ -1,14 +1,14 @@
 import { useRef, useEffect } from "react";
 
 const useDebounced = (
-  { func, delay = 1000 }: { func: Function; delay?: number },
+  { callback, delay = 1000 }: { callback: Function; delay?: number },
   deps: any[] = []
 ) => {
   const timerRef = useRef<number | null>(null);
   useEffect(() => {
     clearTimeout(timerRef.current!);
     timerRef.current = setTimeout(() => {
-      func();
+      callback();
       timerRef.current = null;
     }, delay);
   }, deps);

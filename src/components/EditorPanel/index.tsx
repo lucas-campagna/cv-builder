@@ -30,12 +30,17 @@ import useHotkeys from "@/hooks/useHotkeys";
 import { HELP_PAGE_URL } from "@/constants";
 import SessionsDialog from "./components/SessionsDialog";
 import { useState } from "react";
+import { type File } from "./contexts/ExplorerProvider";
 
 function EditorPanel() {
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
-  const { selectedFile: selectedFile, currentSessionName, saveSession, renameSession } =
-    useExplorer();
+  const {
+    selectedFile: selectedFile,
+    currentSessionName,
+    saveSession,
+    renameSession,
+  } = useExplorer();
   const [newName, setNewName] = useState<string | null>(null);
 
   function handleSave() {
@@ -145,7 +150,7 @@ function EditorPanel() {
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
-              <Header path={selectedFile} />
+              <Header path={selectedFile?.path ?? []} />
             </div>
           </header>
           <Editor />,
@@ -161,10 +166,10 @@ function EditorPanel() {
   );
 }
 
-const Header = ({ path }: { path: string | null }) => (
+const Header = ({ path }: { path: File["path"] }) => (
   <Breadcrumb className="select-none">
     <BreadcrumbList>
-      {path?.split("/").map((part, index, arr) => (
+      {path.map((part, index, arr) => (
         <BreadcrumbItem key={index}>
           {index < arr.length - 1 ? (
             <BreadcrumbLink>{part}</BreadcrumbLink>

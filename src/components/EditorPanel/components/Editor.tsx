@@ -1,6 +1,8 @@
 import MonacoEditor, { DiffEditor } from "@monaco-editor/react";
 import { useExplorer } from "../hooks/useExplorer";
 
+const showDiff = false;
+
 const Editor = () => {
   const { selectedFile: selectedFile, updateFileContent } = useExplorer();
 
@@ -11,11 +13,12 @@ const Editor = () => {
   else if (language === "ts" || language === "tsx") language = "typescript";
   else if (language === "yml") language = "yaml";
 
-  const showDiff = false;
-  const Editor = (...props: any) =>
-    showDiff ? (
+  if (showDiff) {
+    return (
       <DiffEditor
-        {...props}
+        height="100vh"
+        theme="light"
+        language={language}
         options={{
           readOnly: true,
           renderSideBySide: true,
@@ -23,18 +26,18 @@ const Editor = () => {
         original={code}
         modified=""
       />
-    ) : (
-      <MonacoEditor
-        {...props}
-        onChange={(txt: string | undefined) => txt && updateFileContent(txt)}
-        value={code}
-        c
-      />
     );
+  }
 
   return (
     <div className="h-full w-full m-0 text-[16px]">
-      <Editor height="100vh" language={language} theme="light" />
+      <MonacoEditor
+        height="100vh"
+        theme="light"
+        language={language}
+        onChange={(txt: string | undefined) => txt && updateFileContent(txt)}
+        value={code}
+      />
     </div>
   );
 };

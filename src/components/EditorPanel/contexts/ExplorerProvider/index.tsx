@@ -47,7 +47,7 @@ const defaultExplorerContext = {
   selectFile: (_: Path) => {},
   addFile: () => {},
   rmFile: (_: Path) => {},
-  renameFile: (_: Path, __: Path) => {},
+  renameFile: (_: Path) => {},
   updateFileContent: (_: string) => {},
   copyFile: (_: string) => {},
   newSession: (_: string) => {},
@@ -97,7 +97,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         `explorer-session-${state.currentSessionName}`,
         JSON.stringify(state.fileTree)
       );
-      return state;
+      return { ...state };
     });
   };
 
@@ -176,7 +176,9 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const renameFile = (id: string, name: string) => {
+  const renameFile = (name: string) => {
+    if (!state.renamingFile) return;
+    const id = state.renamingFile;
     stopRenaming();
     setState((prevState) => ({
       ...prevState,
@@ -193,15 +195,21 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     setState((prevState) => {
       if (prevState.selectedFile) {
         prevState.selectedFile.content = content;
+        prevState.fileTree = prevState.fileTree.map((file) => {
+          if (file.id === prevState.selectedFile!.id) {
+            file.content = content;
+          }
+          return file;
+        });
       }
-      return prevState;
+      return { ...prevState };
     });
   };
 
   const copyFile = (id: string) => {
     setState((prevState) => {
       const file = prevState.fileTree.find((f) => f.id === id);
-      if (!file) return prevState;
+      if (!file) return { ...prevState };
       const ext = file.name.split(".").pop();
       const newFileName = `${file.name}-copy.${ext}`;
       const newFile = { ...file, id: crypto.randomUUID(), name: newFileName };
