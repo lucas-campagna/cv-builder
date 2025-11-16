@@ -2,10 +2,10 @@ import MonacoEditor, { DiffEditor } from "@monaco-editor/react";
 import { useExplorer } from "../hooks/useExplorer";
 
 const Editor = () => {
-  const { selectedFile = "", fileTree, updateFileContent } = useExplorer();
+  const { selectedFile: selectedFile, updateFileContent } = useExplorer();
 
-  const code = fileTree[selectedFile!] || "";
-  let language = selectedFile ? selectedFile.split(".").pop() : "text";
+  const code = selectedFile?.content || "";
+  let language = selectedFile ? selectedFile.name.split(".").pop() : "text";
 
   if (language === "js" || language === "jsx") language = "javascript";
   else if (language === "ts" || language === "tsx") language = "typescript";

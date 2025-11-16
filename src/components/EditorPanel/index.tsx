@@ -34,7 +34,7 @@ import { useState } from "react";
 function EditorPanel() {
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
-  const { selectedFile, currentSessionName, saveSession, renameSession } =
+  const { selectedFile: selectedFile, currentSessionName, saveSession, renameSession } =
     useExplorer();
   const [newName, setNewName] = useState<string | null>(null);
 

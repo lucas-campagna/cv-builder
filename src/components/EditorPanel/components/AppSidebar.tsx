@@ -59,8 +59,8 @@ const parsePaths = (paths: string[], root: string = ""): TreeItem[] =>
     });
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { fileTree, addFile } = useExplorer();
-  const tree = parsePaths(Object.keys(fileTree));
+  const { addFile } = useExplorer();
+  // const tree = parsePaths(Object.keys(fileTree));
   const items = [
     { label: "New", onClick: () => addFile() },
     { label: "Rename" },
@@ -75,9 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupLabel>Files</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {tree.map((item, index) => (
-                  <Tree key={index} item={item} />
-                ))}
+                <Tree />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -99,13 +97,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 }
 
-function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
-  const { name, path, children: fileTree } = item;
-  const tree = parsePaths(fileTree, joinPath(root, name));
-  const isFile = fileTree.length === 0;
+function Tree({ root = [] }: { root?: string[] }) {
+  // const { name, path, children: fileTree } = item;
+  // const tree = parsePaths(fileTree, joinPath(root, name));
+  // const isFile = fileTree.length === 0;
   const {
     selectFile,
-    selectedFile,
+    selectedFile: selectedFile,
     addFile,
     rmFile,
     renameFile,
@@ -113,74 +111,60 @@ function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
     renamingFile,
     startRenaming,
     stopRenaming,
+    fileTree,
   } = useExplorer();
+  const files = fileTree.filter(
+    (file) =>
+      file.path.length === root.length &&
+      file.path.every((part, index) => part === root[index])
+  );
+  const folders = fileTree.filter(
+    (file) =>
+      file.path.length > root.length &&
+      file.path.every((part, index) => part === root[index])
+  );
+
   // const [isRenaming, setIsRenaming] = React.useState(false);
-  const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      renameFile(path, e.currentTarget.value);
-    }
-  };
-  const isRenaming = renamingFile === path;
-  const renameInputRef = React.useRef<HTMLInputElement>(null);
-  const newFile = () => {
-    addFile();
-    startRenaming(path);
-  };
-  const items = [
-    {
-      label: "New",
-      onClick: newFile,
-    },
-    { label: "Rename", onClick: () => startRenaming(path) },
-    {
-      label: "Copy",
-      onClick: () => {
-        copyFile(path);
-        startRenaming(path);
-      },
-    },
-    { label: "Delete", onClick: () => rmFile(path) },
-  ];
+  // const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === "Enter") {
+  //     renameFile(path, e.currentTarget.value);
+  //   }
+  // };
+  // const isRenaming = renamingFile === path;
+  // const renameInputRef = React.useRef<HTMLInputElement>(null);
+  // const newFile = () => {
+  //   addFile();
+  //   startRenaming(path);
+  // };
+  // const items = [
+  //   {
+  //     label: "New",
+  //     onClick: newFile,
+  //   },
+  //   { label: "Rename", onClick: () => startRenaming(path) },
+  //   {
+  //     label: "Copy",
+  //     onClick: () => {
+  //       copyFile(path);
+  //       startRenaming(path);
+  //     },
+  //   },
+  //   { label: "Delete", onClick: () => rmFile(path) },
+  // ];
 
-  useHotkeys({
-    escape: stopRenaming,
-    f2: () => startRenaming(path),
-    "alt+n": newFile, // Placeholder for new file action
-  });
+  // useHotkeys({
+  //   escape: stopRenaming,
+  //   f2: () => startRenaming(path),
+  //   "alt+n": newFile, // Placeholder for new file action
+  // });
 
-  useEffect(() => {
-    if (isRenaming) {
-      setTimeout(() => {
-        renameInputRef.current?.select();
-      }, 200);
-    }
-  }, [isRenaming]);
-
-  if (isFile && path) {
-    return (
-      <OptionMenu items={items}>
-        <SidebarMenuButton
-          isActive={path === selectedFile}
-          className="data-[active=true]:bg-transparent"
-          onClick={() => selectFile(path)}
-        >
-          <File />
-          {isRenaming ? (
-            <Input
-              autoFocus
-              ref={renameInputRef}
-              onFocus={(e) => e.currentTarget.select()}
-              defaultValue={name}
-              onKeyDown={handleRename}
-              onBlur={() => stopRenaming()}
-            />
-          ) : (
-            name
-          )}
-        </SidebarMenuButton>
-      </OptionMenu>
-    );
-  }
+  // useEffect(() => {
+  //   if (isRenaming) {
+  //     setTimeout(() => {
+  //       renameInputRef.current?.select();
+  //     }, 200);
+  //   }
+  // }, [isRenaming]);
 
   return (
     <SidebarMenuItem>
@@ -203,3 +187,29 @@ function Tree({ item, root = "" }: { item: TreeItem; root?: string }) {
     </SidebarMenuItem>
   );
 }
+
+const TreeLeaf = () => {
+  return (
+    <OptionMenu items={items}>
+      <SidebarMenuButton
+        isActive={path === selectedFile}
+        className="data-[active=true]:bg-transparent"
+        onClick={() => selectFile(path)}
+      >
+        <File />
+        {isRenaming ? (
+          <Input
+            autoFocus
+            ref={renameInputRef}
+            onFocus={(e) => e.currentTarget.select()}
+            defaultValue={name}
+            onKeyDown={handleRename}
+            onBlur={() => stopRenaming()}
+          />
+        ) : (
+          name
+        )}
+      </SidebarMenuButton>
+    </OptionMenu>
+  );
+};

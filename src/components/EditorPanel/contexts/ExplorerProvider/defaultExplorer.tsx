@@ -1,4 +1,4 @@
-import type { Explorer } from ".";
+import type { File } from ".";
 import main from "@/assets/defaultDocuments/main.yml?raw";
 import document from "@/assets/defaultDocuments/document.yml?raw";
 import education from "@/assets/defaultDocuments/components/education.yml?raw";
@@ -9,7 +9,7 @@ import row from "@/assets/defaultDocuments/components/ui/row.yml?raw";
 import section from "@/assets/defaultDocuments/components/ui/section.yml?raw";
 import icons from "@/assets/defaultDocuments/components/icons.yml?raw";
 
-const defaultExplorer: Explorer[] = [
+const defaultExplorer: File[] = [
   {
     id: "74206ff5-24ce-4271-92a8-f2d0548afbb9",
     name: "main.yml",

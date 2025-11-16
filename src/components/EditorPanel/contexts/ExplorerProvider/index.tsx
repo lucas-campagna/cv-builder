@@ -7,7 +7,7 @@ export interface FileNode {
 }
 
 export type Path = string;
-export type Explorer = {
+export type File = {
   id: string;
   name: string;
   path: string[];
@@ -16,8 +16,8 @@ export type Explorer = {
 
 export interface ExplorerState {
   currentSessionName: any;
-  selectedFileIndex: number;
-  fileTree: Explorer[];
+  selectedFile: File | null;
+  fileTree: File[];
   renamingFile: string | null;
 }
 
@@ -39,8 +39,8 @@ example_of_component:
 `;
 
 const defaultExplorerContext = {
-  selectedFileIndex: 0,
-  fileTree: defaultExplorer as Explorer[],
+  selectedFile: defaultExplorer[0] as File | null,
+  fileTree: defaultExplorer as File[],
   currentSessionName: DEFAULT_SESSION as string,
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
@@ -55,7 +55,7 @@ const defaultExplorerContext = {
   loadSession: (_: string) => {},
   deleteSession: (_: string) => {},
   renameSession: (_: string) => {},
-  startRenaming: (_: string | null) => {},
+  startRenaming: (_: string) => {},
   stopRenaming: () => {},
 };
 
@@ -64,15 +64,16 @@ export const ExplorerContext = createContext(defaultExplorerContext);
 const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<ExplorerState>({
     fileTree: defaultExplorerContext.fileTree,
-    selectedFileIndex: defaultExplorerContext.selectedFileIndex,
+    selectedFile: defaultExplorerContext.selectedFile,
     currentSessionName: defaultExplorerContext.currentSessionName,
     renamingFile: defaultExplorerContext.renamingFile,
   });
 
   const newSession = (sessionName: string) => {
+    const id = crypto.randomUUID();
     const fileTree = [
       {
-        id: crypto.randomUUID(),
+        id,
         name: DEFAULT_SELECTED_FILE,
         path: [],
         content: DEFAULT_MAIN_FILE_CONTENT,
@@ -80,7 +81,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     ];
     setState({
       fileTree,
-      selectedFileIndex: 0,
+      selectedFile: fileTree[0],
       currentSessionName: sessionName,
       renamingFile: null,
     });
@@ -103,11 +104,11 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const loadSession = (sessionName: string) => {
     const sessionData = localStorage.getItem(`explorer-session-${sessionName}`);
     if (sessionData) {
-      const fileTree = JSON.parse(sessionData) as Explorer[];
+      const fileTree = JSON.parse(sessionData) as File[];
       setState((prevState) => ({
         ...prevState,
         fileTree,
-        selectedFileIndex: 0,
+        selectedFile: fileTree[0] || null,
         currentSessionName: sessionName,
       }));
     }
@@ -142,13 +143,16 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         counter++;
       }
     })();
+    const newFile = {
+      id: crypto.randomUUID(),
+      name: newFileName,
+      path: [],
+      content: "",
+    };
     setState((prevState) => ({
       ...prevState,
-      fileTree: [
-        ...prevState.fileTree,
-        { id: crypto.randomUUID(), name: newFileName, path: [], content: "" },
-      ],
-      selectedFileIndex: -1,
+      fileTree: [...prevState.fileTree, newFile],
+      selectedFile: newFile,
     }));
   };
 
@@ -160,10 +164,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       return {
         ...prevState,
         fileTree: newFileTree,
-        selectedFileIndex:
-          prevState.fileTree[prevState.selectedFileIndex]?.id === id
-            ? 0
-            : prevState.selectedFileIndex,
+        selectedFile: newFileTree[0] || null,
       };
     });
   };
@@ -171,10 +172,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const selectFile = (id: string) => {
     setState((prevState) => ({
       ...prevState,
-      selectedFileIndex: (() => {
-        const index = prevState.fileTree.findIndex((file) => file.id === id);
-        return index !== -1 ? index : prevState.selectedFileIndex;
-      })(),
+      selectedFile: prevState.fileTree.find((file) => file.id === id) || null,
     }));
   };
 
@@ -192,32 +190,25 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateSelectedFileContent = (content: string) => {
-    setState((prevState) => ({
-      ...prevState,
-      fileTree: [
-        ...prevState.fileTree.slice(0, prevState.selectedFileIndex),
-        {
-          ...prevState.fileTree[prevState.selectedFileIndex],
-          content,
-        },
-        ...prevState.fileTree.slice(prevState.selectedFileIndex + 1),
-      ],
-    }));
+    setState((prevState) => {
+      if (prevState.selectedFile) {
+        prevState.selectedFile.content = content;
+      }
+      return prevState;
+    });
   };
 
   const copyFile = (id: string) => {
     setState((prevState) => {
-      const file = state.fileTree.find((f) => f.id === id);
+      const file = prevState.fileTree.find((f) => f.id === id);
       if (!file) return prevState;
       const ext = file.name.split(".").pop();
       const newFileName = `${file.name}-copy.${ext}`;
+      const newFile = { ...file, id: crypto.randomUUID(), name: newFileName };
       return {
         ...prevState,
-        fileTree: [
-          ...prevState.fileTree,
-          { ...file, id: crypto.randomUUID(), name: newFileName },
-        ],
-        selectedFileIndex: state.fileTree.length,
+        fileTree: [...prevState.fileTree, newFile],
+        selectedFile: newFile,
       };
     });
   };
@@ -236,10 +227,10 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     return sessions;
   }, [state]);
 
-  const startRenaming = (path: string | null) => {
+  const startRenaming = (id: string) => {
     setState((prevState) => ({
       ...prevState,
-      renamingFile: path,
+      renamingFile: id,
     }));
   };
 
