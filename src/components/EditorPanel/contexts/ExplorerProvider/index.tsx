@@ -210,8 +210,8 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     setState((prevState) => {
       const file = prevState.fileTree.find((f) => f.id === id);
       if (!file) return { ...prevState };
-      const ext = file.name.split(".").pop();
-      const newFileName = `${file.name}-copy.${ext}`;
+      const [name, ext] = file.name.split(".");
+      const newFileName = `${name}-copy.${ext}`;
       const newFile = { ...file, id: crypto.randomUUID(), name: newFileName };
       return {
         ...prevState,
