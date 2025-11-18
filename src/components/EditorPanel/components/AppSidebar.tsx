@@ -85,6 +85,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function Tree({ root = [] }: { root?: string[] }) {
+  // const { name, path, children: fileTree } = item;
+  // const tree = parsePaths(fileTree, joinPath(root, name));
+  // const isFile = fileTree.length === 0;
   const { fileTree } = useExplorer();
   const files = fileTree.filter(
     (file) =>
@@ -92,112 +95,121 @@ function Tree({ root = [] }: { root?: string[] }) {
       root.every((part, index) => part === file.path[index])
   );
   const folders = fileTree
-    .filter(
-      (file) =>
-        file.path.length > root.length &&
-        root.every((part, index) => part === file.path[index])
-    )
-    .map((folder) => folder.path.slice(0, root.length + 1).join("/"))
-    .reduce((folders, folder) => {
-      if (!folders.includes(folder)) {
-        folders.push(folder);
-      }
-      return folders;
-    }, [] as string[])
-    .map((folder) => folder.split("/"));
+    .filter((file) => file.path.length > root.length)
+    .reduce(
+      (acc, { path, ...props }) =>
+        acc.some((prev) =>
+          prev.path.every((part, index) => part === path[index])
+        )
+          ? acc
+          : [
+              ...acc,
+              {
+                ...props,
+                path: path.slice(0, root.length + 1),
+              },
+            ],
+      [] as File[]
+    );
+  // .filter((v,i,a)=>a.findIndex(t=>t.name===v.name)===i);
 
-  return (
-    <>
-      {folders.map((folder, index) => (
-        <TreeFolder root={folder} key={index} />
-      ))}
-      {files.map((file, index) => (
-        <TreeFile file={file} key={index} />
-      ))}
-    </>
-  );
-}
-
-const TreeFolder = ({ root }: { root: string[] }) => {
-  return (
-    <SidebarMenuItem>
-      <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
-        <CollapsibleTrigger asChild>
-          <SidebarMenuButton>
-            <ChevronRight className="transition-transform" />
-            <Folder />
-            {root.at(-1)}
-          </SidebarMenuButton>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            <Tree root={root} />
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
-  );
-};
-
-const TreeFile = ({ file }: { file: File }) => {
-  const {
-    selectedFile,
-    selectFile,
-    renamingFile,
-    startRenaming,
-    stopRenaming,
-    renameFile,
-    copyFile,
-    rmFile,
-    addFile,
-  } = useExplorer();
-
-  const isRenaming = renamingFile === file.id;
-  const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      renameFile(e.currentTarget.value);
-    }
-  };
+  // const [isRenaming, setIsRenaming] = React.useState(false);
+  // const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === "Enter") {
+  //     renameFile(path, e.currentTarget.value);
+  //   }
+  // };
   // const isRenaming = renamingFile === path;
-  const rename = () => startRenaming(file.id);
-  const renameInputRef = React.useRef<HTMLInputElement>(null);
-  const newFile = () => {
-    addFile();
-    rename();
-  };
-  const items = [
-    {
-      label: "New",
-      onClick: newFile,
-    },
-    { label: "Rename", onClick: () => rename() },
-    {
-      label: "Copy",
-      onClick: () => {
-        copyFile(file.id);
-        rename();
-      },
-    },
-    { label: "Delete", onClick: () => rmFile(file.id) },
-  ];
+  // const renameInputRef = React.useRef<HTMLInputElement>(null);
+  // const newFile = () => {
+  //   addFile();
+  //   startRenaming(path);
+  // };
+  // const items = [
+  //   {
+  //     label: "New",
+  //     onClick: newFile,
+  //   },
+  //   { label: "Rename", onClick: () => startRenaming(path) },
+  //   {
+  //     label: "Copy",
+  //     onClick: () => {
+  //       copyFile(path);
+  //       startRenaming(path);
+  //     },
+  //   },
+  //   { label: "Delete", onClick: () => rmFile(path) },
+  // ];
+
+  // useHotkeys({
+  //   escape: stopRenaming,
+  //   f2: () => startRenaming(path),
+  //   "alt+n": newFile, // Placeholder for new file action
+  // });
 
   // useEffect(() => {
   //   if (isRenaming) {
   //     setTimeout(() => {
   //       renameInputRef.current?.select();
-  //     }, 500);
+  //     }, 200);
   //   }
   // }, [isRenaming]);
 
+  console.log(folders, files);
+
+  return folders
+    .map((folder, index) => (
+      <TreeFolder key={`folder-${index}`} folder={folder} />
+    ))
+    .concat(
+      files.map((file, index) => <TreeFile key={`file-${index}`} file={file} />)
+    );
+}
+
+const TreeFolder = ({ folder }: { folder: File }) => (
+  <SidebarMenuItem>
+    <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
+      <CollapsibleTrigger asChild>
+        <SidebarMenuButton>
+          <ChevronRight className="transition-transform" />
+          <Folder />
+          {folder.path.at(-1)}
+        </SidebarMenuButton>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <SidebarMenuSub>
+          <Tree root={folder.path} />
+        </SidebarMenuSub>
+      </CollapsibleContent>
+    </Collapsible>
+  </SidebarMenuItem>
+);
+const TreeFile = ({ file }: { file: File }) => {
+  const { selectedFile, selectFile, renamingFile, stopRenaming, renameFile } =
+    useExplorer();
+  const renameInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      renameFile(file.id);
+    }
+  };
+
+  const items = [
+    { label: "New" },
+    { label: "Rename" },
+    { label: "Copy" },
+    { label: "Delete" },
+  ];
   return (
     <OptionMenu items={items}>
       <SidebarMenuButton
-        isActive={file.id === selectedFile?.id}
+        isActive={!!selectedFile && file.id === selectedFile.id}
         className="data-[active=true]:bg-transparent"
         onClick={() => selectFile(file.id)}
       >
         <FileIcon />
-        {file.id === renamingFile ? (
+        {renamingFile === file.id ? (
           <Input
             autoFocus
             ref={renameInputRef}
