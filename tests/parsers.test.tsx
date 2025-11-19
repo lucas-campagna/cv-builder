@@ -841,7 +841,7 @@ bulletPoint:
   expect(component()).toBe(
     `<li class="list-disc ml-5 my-1 text-base">item 1</li><li class="list-disc ml-5 my-1 text-base">item 2</li><li class="list-disc ml-5 my-1 text-base">item 3</li>`
   );
-})
+});
 
 test("implicit item with implicit body in list and args", () => {
   const yaml = `
@@ -877,6 +877,29 @@ bullet:
 `;
   const component = buildDocument(yaml);
   expect(component()).toBe(
-  `<h1>EXPERIENCES</h1><div class="px-2"><div>Company A</div><h2>2024</h2><p>Description A</p><div>Company B</div><h2>2025</h2><p>Description B<p>Description B</p><li class="list-disc ml-5 my-1 text-base">Description B</li></p></div>`
+    `<h1>EXPERIENCES</h1><div class="px-2"><div>Company A</div><h2>2024</h2><p>Description A</p><div>Company B</div><h2>2025</h2><p>Description B<p>Description B</p><li class="list-disc ml-5 my-1 text-base">Description B</li></p></div>`
   );
-})
+});
+
+test("implementing a map with explicit component declaration", () => {
+  const yaml = `
+document:
+  - listOfItems
+
+$box:
+  from: div
+  style: p-2 bg-gray-100 my-1
+  body: $item
+
+listOfItems:
+  from: box
+  item:
+    - Item 1
+    - Item 2
+    - Item 3
+`;
+  const component = buildDocument(yaml);
+  expect(component()).toBe(
+    `<div class="p-2 bg-gray-100 my-1">Item 1</div><div class="p-2 bg-gray-100 my-1">Item 2</div><div class="p-2 bg-gray-100 my-1">Item 3</div>`
+  );
+});

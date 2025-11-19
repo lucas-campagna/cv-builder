@@ -7,15 +7,15 @@ const parse = (
   components: SetOfComponents = {}
 ): ComponentProps => {
   let { from, ...props } = target;
-  if (!from || !components[from]) {
-    return target;
-  }
-  const templated = build(from, components);
+  if (!from) return target;
+  const componentName = components[from] ? from : components["$" + from] ? "$" + from : null;
+  if (!componentName) return target;
+  const templated = build(componentName, components);
   return parse(
     {
       body: target.body,
       style: target.style,
-      ...parseProps(templated, { ...components[from], ...props }),
+      ...parseProps(templated, { ...components[componentName], ...props }),
       from: templated.from,
     },
     components

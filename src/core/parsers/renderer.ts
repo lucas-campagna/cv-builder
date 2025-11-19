@@ -20,8 +20,11 @@ const render = ({
         ...props,
       }
     : {};
-  const children =
-    typeof body === "object"
+  let children;
+  if (Array.isArray(body) && hasAnyProp && body.every(item => item && typeof item === "object" && "body" in item && Object.keys(item).length === 1 && typeof item.body === "string")) {
+    return body.map((item, index) => render({ from, style, ...props, body: item.body, key: index })).join("");
+  } else {
+    children = typeof body === "object"
       ? (Array.isArray(body) ? body : [body])
           .filter(Boolean)
           .map((body: any, index: number) =>
@@ -33,6 +36,7 @@ const render = ({
           )
           .join("")
       : (body ? String(body) : "");
+  }
   if (type === "fragment") {
     return children;
   }
