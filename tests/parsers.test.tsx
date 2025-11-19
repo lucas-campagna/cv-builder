@@ -903,3 +903,21 @@ listOfItems:
     `<div class="p-2 bg-gray-100 my-1">Item 1</div><div class="p-2 bg-gray-100 my-1">Item 2</div><div class="p-2 bg-gray-100 my-1">Item 3</div>`
   );
 });
+
+test("implementing a map with implicitly component declaration", () => {
+  const yaml = `
+document:
+  - box:
+    - Item 1
+    - Item 2
+    - Item 3
+
+$box:
+  from: div
+  style: p-2 bg-gray-100 my-1
+`;
+  const component = buildDocument(yaml);
+  expect(component()).toBe(
+    `<div class="p-2 bg-gray-100 my-1">Item 1</div><div class="p-2 bg-gray-100 my-1">Item 2</div><div class="p-2 bg-gray-100 my-1">Item 3</div>`
+  );
+});
