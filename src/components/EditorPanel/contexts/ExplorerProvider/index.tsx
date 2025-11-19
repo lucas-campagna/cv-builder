@@ -45,7 +45,7 @@ const defaultExplorerContext = {
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
   selectFile: (_: Path) => {},
-  addFile: () => {},
+  addFile: () => "",
   rmFile: (_: Path) => {},
   renameFile: (_: Path) => {},
   updateFileContent: (_: string) => {},
@@ -143,8 +143,9 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         counter++;
       }
     })();
+    const id = crypto.randomUUID();
     const newFile = {
-      id: crypto.randomUUID(),
+      id,
       name: newFileName,
       path: [],
       content: "",
@@ -154,6 +155,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       fileTree: [...prevState.fileTree, newFile],
       selectedFile: newFile,
     }));
+    return id;
   };
 
   const rmFile = (id: string) => {
@@ -179,9 +181,9 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const renameFile = (name: string) => {
     if (!state.renamingFile) return;
     const id = state.renamingFile;
-    stopRenaming();
     setState((prevState) => ({
       ...prevState,
+      renamingFile: null,
       fileTree: prevState.fileTree.map((file) => {
         if (file.id === id) {
           file.name = name;

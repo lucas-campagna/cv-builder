@@ -37,22 +37,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const rename = () => selectedFile && startRenaming(selectedFile.id);
   const copy = () => selectedFile && copyFile(selectedFile.id);
   const rm = () => selectedFile && rmFile(selectedFile.id);
-  const newFile = () => {
-    addFile();
-    rename();
-  };
+  const newFile = () => startRenaming(addFile());
   const items = [
-    { label: "New", onClick: addFile },
+    { label: "New", onClick: newFile },
     { label: "Rename", onClick: rename },
     { label: "Copy", onclick: copy },
     { label: "Delete", rm },
   ];
 
-  useHotkeys({
-    escape: stopRenaming,
-    f2: rename,
-    "alt+n": newFile,
-  });
+  useHotkeys(
+    {
+      escape: stopRenaming,
+      f2: rename,
+      "alt+n": newFile,
+      delete: rm,
+    },
+    [selectedFile]
+  );
 
   return (
     <OptionMenu items={items}>
@@ -85,9 +86,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function Tree({ root = [] }: { root?: string[] }) {
-  // const { name, path, children: fileTree } = item;
-  // const tree = parsePaths(fileTree, joinPath(root, name));
-  // const isFile = fileTree.length === 0;
   const { fileTree } = useExplorer();
   const files = fileTree.filter(
     (file) =>
@@ -111,52 +109,6 @@ function Tree({ root = [] }: { root?: string[] }) {
             ],
       [] as File[]
     );
-  // .filter((v,i,a)=>a.findIndex(t=>t.name===v.name)===i);
-
-  // const [isRenaming, setIsRenaming] = React.useState(false);
-  // const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === "Enter") {
-  //     renameFile(path, e.currentTarget.value);
-  //   }
-  // };
-  // const isRenaming = renamingFile === path;
-  // const renameInputRef = React.useRef<HTMLInputElement>(null);
-  // const newFile = () => {
-  //   addFile();
-  //   startRenaming(path);
-  // };
-  // const items = [
-  //   {
-  //     label: "New",
-  //     onClick: newFile,
-  //   },
-  //   { label: "Rename", onClick: () => startRenaming(path) },
-  //   {
-  //     label: "Copy",
-  //     onClick: () => {
-  //       copyFile(path);
-  //       startRenaming(path);
-  //     },
-  //   },
-  //   { label: "Delete", onClick: () => rmFile(path) },
-  // ];
-
-  // useHotkeys({
-  //   escape: stopRenaming,
-  //   f2: () => startRenaming(path),
-  //   "alt+n": newFile, // Placeholder for new file action
-  // });
-
-  // useEffect(() => {
-  //   if (isRenaming) {
-  //     setTimeout(() => {
-  //       renameInputRef.current?.select();
-  //     }, 200);
-  //   }
-  // }, [isRenaming]);
-
-  console.log(folders, files);
-
   return folders
     .map((folder, index) => (
       <TreeFolder key={`folder-${index}`} folder={folder} />
@@ -185,22 +137,41 @@ const TreeFolder = ({ folder }: { folder: File }) => (
   </SidebarMenuItem>
 );
 const TreeFile = ({ file }: { file: File }) => {
-  const { selectedFile, selectFile, renamingFile, stopRenaming, renameFile } =
-    useExplorer();
+  const {
+    selectedFile,
+    selectFile,
+    renamingFile,
+    startRenaming,
+    stopRenaming,
+    renameFile,
+    copyFile,
+    rmFile,
+    addFile,
+  } = useExplorer();
   const renameInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      renameFile(file.id);
+      renameFile(renameInputRef.current?.value || file.name);
     }
   };
 
   const items = [
-    { label: "New" },
-    { label: "Rename" },
-    { label: "Copy" },
-    { label: "Delete" },
+    { label: "New", onClick: () => startRenaming(addFile()) },
+    { label: "Rename", onClick: () => startRenaming(file.id) },
+    { label: "Copy", onClick: () => copyFile(file.id) },
+    { label: "Delete", onClick: () => rmFile(file.id) },
   ];
+  const isRenaming = renamingFile === file.id;
+
+  useEffect(() => {
+    if (isRenaming) {
+      setTimeout(() => {
+        renameInputRef.current?.select();
+      }, 200);
+    }
+  }, [isRenaming]);
+
   return (
     <OptionMenu items={items}>
       <SidebarMenuButton
@@ -216,7 +187,7 @@ const TreeFile = ({ file }: { file: File }) => {
             onFocus={(e) => e.currentTarget.select()}
             defaultValue={file.name}
             onKeyDown={handleRename}
-            onBlur={() => stopRenaming()}
+            onBlur={stopRenaming}
           />
         ) : (
           file.name

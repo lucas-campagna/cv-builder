@@ -21,7 +21,11 @@ const OptionMenu = ({
     <ContextMenuTrigger>{children}</ContextMenuTrigger>
     <ContextMenuContent>
       {items.map((item) => (
-        <ContextMenuItem key={item.label} onClick={item.onClick} disabled={!item.onClick}>
+        <ContextMenuItem
+          key={item.label}
+          onClick={item.onClick}
+          disabled={!item.onClick}
+        >
           {item.label}
         </ContextMenuItem>
       ))}
