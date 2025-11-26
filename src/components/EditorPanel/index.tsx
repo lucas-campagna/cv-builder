@@ -142,13 +142,7 @@ function EditorPanel() {
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
-              <Header
-                path={
-                  selectedFile
-                    ? selectedFile.path.concat(selectedFile.name)
-                    : []
-                }
-              />
+              <Header file={selectedFile} />
             </div>
           </header>
           <Editor />

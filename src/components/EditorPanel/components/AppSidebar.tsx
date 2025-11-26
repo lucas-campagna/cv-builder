@@ -21,7 +21,7 @@ import {
 import { useExplorer } from "../hooks/useExplorer";
 import OptionMenu from "../../OptionMenu";
 import { Input } from "@/components/ui/input";
-import { type File } from "../contexts/ExplorerProvider";
+import { type File, type Path } from "../contexts/ExplorerProvider";
 import useHotkeys from "@/hooks/useHotkeys";
 import { useEffect } from "react";
 
@@ -83,23 +83,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 }
 
-function Tree({ root = [] }: { root?: string[] }) {
+function Tree({ root = "" }: { root?: Path["path"] }) {
   const { fileTree } = useExplorer();
   const files = fileTree
-    .filter(
-      (file) =>
-        file.type === "file" &&
-        file.path.length === root.length &&
-        root.every((part, index) => part === file.path[index])
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .filter((file) => file.type === "file" && file.path === root)
+    .sort((a, b) => a.name.localeCompare(b.name)) as File[];
   const folders = fileTree
-    .filter(
-      (file) =>
-        file.type === "folder" &&
-        file.path.length === root.length &&
-        root.every((part, index) => part === file.path[index])
-    )
+    .filter((file) => file.type === "folder" && file.path === root)
     .sort((a, b) => a.name.localeCompare(b.name));
   return [
     ...folders.map((folder, index) => (
@@ -111,8 +101,8 @@ function Tree({ root = [] }: { root?: string[] }) {
   ];
 }
 
-const TreeFolder = ({ folder }: { folder: File }) => {
-  const path = [...folder.path, folder.name];
+const TreeFolder = ({ folder }: { folder: Path }) => {
+  const path = folder.id;
   const { addFile, startRenaming, renamingFile, renameFolder, stopRenaming } =
     useExplorer();
   const items = [

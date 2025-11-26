@@ -2,23 +2,24 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import defaultExplorer from "./defaultExplorer";
 
 export interface FileNode {
-  path: string;
-  content: string;
+  path: File["path"];
+  content: File["content"];
 }
 
-export type Path = string;
-export type File = {
+export type Path = {
   id: string;
   name: string;
-  path: string[];
-  content: string;
+  path: Path["id"];
   type: "file" | "folder";
+};
+export type File = Path & {
+  content: string;
 };
 
 export interface ExplorerState {
   currentSessionName: any;
-  selectedFile: File | null;
-  fileTree: File[];
+  selectedFile: (Path | File) | null;
+  fileTree: (Path | File)[];
   renamingFile: string | null;
 }
 
@@ -41,20 +42,21 @@ example_of_component:
 `;
 
 const defaultExplorerContext = {
-  selectedFile: defaultExplorer[0] as File | null,
-  fileTree: defaultExplorer as File[],
+  selectedFile: defaultExplorer[0] as (Path | File) | null,
+  fileTree: defaultExplorer as (Path | File)[],
   currentSessionName: DEFAULT_SESSION as string,
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
   selectFile: (_: File["id"]) => {},
   addFile: (_?: File["path"]) => "" as File["id"],
-  addDirectory: (_?: File["path"]) => "" as File["id"],
+  addDirectory: (_?: Path["path"]) => "" as File["id"],
   rmFile: (_: File["id"]) => {},
-  rmDirectory: (_: File["id"]) => {},
+  rmDirectory: (_: Path["id"]) => {},
   renameFile: (_: File["name"]) => {},
-  renameFolder: (_: File["name"]) => {},
+  renameFolder: (_: Path["name"]) => {},
   updateFileContent: (_: string) => {},
   copyFile: (_: File["id"]) => {},
+  copyFolder: (_: Path["id"]) => {},
   newSession: (_: string) => {},
   saveSession: () => {},
   loadSession: (_: string) => {},
@@ -62,6 +64,7 @@ const defaultExplorerContext = {
   renameSession: (_: string) => {},
   startRenaming: (_: string) => {},
   stopRenaming: () => {},
+  getFullPath: (_: File["id"]) => [] as File["name"][],
 };
 
 export const ExplorerContext = createContext(defaultExplorerContext);
@@ -80,7 +83,6 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       {
         id,
         name: DEFAULT_SELECTED_FILE,
-        path: [],
         content: DEFAULT_MAIN_FILE_CONTENT,
         type: "file",
       } as File,
@@ -138,7 +140,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const addFile = (root: File["path"] = []) => {
+  const addFile = (root: File["path"] = "") => {
     const newFileName = (() => {
       let fileName = `${DEFAULT_FILE_NAME}.yml`;
       let counter = 1;
@@ -165,7 +167,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     return id;
   };
 
-  const addDirectory = (root: File["path"] = []) => {
+  const addDirectory = (root: File["path"] = "") => {
     const newDirectoryName = (() => {
       let fileName = `${DEFAULT_FOLDER_NAME}`;
       let counter = 1;
@@ -194,7 +196,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     return id;
   };
 
-  const rmFile = (id: string) => {
+  const rmFile = (id: File["id"]) => {
     setState((prevState) => {
       const newFileTree = prevState.fileTree.filter(
         ({ id: fileId }) => fileId !== id
@@ -207,16 +209,10 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const rmDirectory = (id: string) => {
+  const rmDirectory = (id: Path["id"]) => {
     setState((prevState) => {
-      const directoryToRemove = prevState.fileTree.find(
-        (f) => f.id === id && f.type === "folder"
-      );
-      if (!directoryToRemove) return prevState;
       const newFileTree = prevState.fileTree.filter(
-        ({ id: fileId, path }) =>
-          fileId !== id &&
-          directoryToRemove.path.every((part, index) => part === path[index])
+        ({ id: folderId, path }) => folderId !== id && path !== id
       );
       return {
         ...prevState,
@@ -226,14 +222,14 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const selectFile = (id: string) => {
+  const selectFile = (id: Path["id"]) => {
     setState((prevState) => ({
       ...prevState,
       selectedFile: prevState.fileTree.find((file) => file.id === id) || null,
     }));
   };
 
-  const renameFile = (name: string) => {
+  const renameFile = (name: File["name"]) => {
     if (!state.renamingFile) return;
     const id = state.renamingFile;
     setState((prevState) => ({
@@ -248,36 +244,15 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const renameFolder = (name: string) => {
-    if (!state.renamingFile) return;
-    const id = state.renamingFile;
-    const folder = state.fileTree.find((file) => file.id === id);
-    if (!folder) return;
-    const oldName = folder.name;
-    setState((prevState) => ({
-      ...prevState,
-      renamingFile: null,
-      fileTree: prevState.fileTree.map((file) => {
-        if (file.id === id) {
-          file.name = name;
-        } else if (
-          folder.path.every((part, index) => part === file.path[index]) &&
-          oldName === file.path[folder.path.length]
-        ) {
-          file.path[folder.path.length] = name;
-        }
-        return file;
-      }),
-    }));
-  };
+  const renameFolder = (name: Path["name"]) => renameFile(name);
 
-  const updateSelectedFileContent = (content: string) => {
+  const updateSelectedFileContent = (content: File["content"]) => {
     setState((prevState) => {
-      if (prevState.selectedFile) {
-        prevState.selectedFile.content = content;
+      if (prevState.selectedFile?.type === "file") {
+        (prevState.selectedFile as File).content = content;
         prevState.fileTree = prevState.fileTree.map((file) => {
-          if (file.id === prevState.selectedFile!.id) {
-            file.content = content;
+          if (file.type === "file" && file.id === prevState.selectedFile!.id) {
+            (file as File).content = content;
           }
           return file;
         });
@@ -286,7 +261,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const copyFolder = (id: File["id"]) => {
+  const copyFile = (id: File["id"]) => {
     setState((prevState) => {
       const file = prevState.fileTree.find((f) => f.id === id);
       if (!file) return { ...prevState };
@@ -297,6 +272,34 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         ...prevState,
         fileTree: [...prevState.fileTree, newFile],
         selectedFile: newFile,
+      };
+    });
+  };
+
+  const copyFolder = (id: Path["id"]) => {
+    setState((prevState) => {
+      const folder = prevState.fileTree.find((f) => f.id === id);
+      if (!folder) return { ...prevState };
+      const newFolderName = `${folder.name}-copy`;
+      const newFolder = {
+        ...folder,
+        id: crypto.randomUUID(),
+        name: newFolderName,
+      };
+      const newFiles = prevState.fileTree.reduce(
+        (acc, file) =>
+          file.id === id
+            ? acc
+            : [
+                ...acc,
+                { ...file, id: crypto.randomUUID(), path: newFolder.id },
+              ],
+        [] as (Path | File)[]
+      );
+      return {
+        ...prevState,
+        fileTree: [...prevState.fileTree, newFolder, ...newFiles],
+        selectedFile: newFolder,
       };
     });
   };
@@ -324,6 +327,12 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
 
   const stopRenaming = () => setState((s) => ({ ...s, renamingFile: null }));
 
+  const getFullPath = (id: File["id"]): File["name"][] => {
+    const current = state.fileTree.find((file) => file.id === id);
+    if (!current) return [];
+    return [...getFullPath(current.path), current.name];
+  };
+
   useEffect(() => {
     saveSession();
   }, []);
@@ -342,6 +351,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         renameFolder,
         updateFileContent: updateSelectedFileContent,
         copyFile,
+        copyFolder,
         newSession,
         saveSession,
         loadSession,
@@ -349,6 +359,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         renameSession,
         startRenaming,
         stopRenaming,
+        getFullPath,
       }}
     >
       {children}
