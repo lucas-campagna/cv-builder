@@ -110,13 +110,15 @@ const TreeFolder = ({ folder }: { folder: Path }) => {
     renameFolder,
     stopRenaming,
     addDirectory,
+    copyDirectory,
+    rmDirectory,
   } = useExplorer();
   const items = [
     { label: "New file", onClick: () => startRenaming(addFile(path)) },
     { label: "New folder", onClick: () => startRenaming(addDirectory(path)) },
     { label: "Rename", onClick: () => startRenaming(folder.id) },
-    { label: "Copy" },
-    { label: "Delete" },
+    { label: "Copy", onClick: () => copyDirectory(folder.id) },
+    { label: "Delete", onClick: () => rmDirectory(folder.id) },
   ];
   const renameInputRef = React.useRef<HTMLInputElement>(null);
   const isRenaming = renamingFile === folder.id;

@@ -56,7 +56,7 @@ const defaultExplorerContext = {
   renameFolder: (_: Path["name"]) => {},
   updateFileContent: (_: string) => {},
   copyFile: (_: File["id"]) => {},
-  copyFolder: (_: Path["id"]) => {},
+  copyDirectory: (_: Path["id"]) => {},
   newSession: (_: string) => {},
   saveSession: () => {},
   loadSession: (_: string) => {},
@@ -276,24 +276,20 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const copyFolder = (id: Path["id"]) => {
+  const copyDirectory = (id: Path["id"]) => {
     setState((prevState) => {
       const folder = prevState.fileTree.find((f) => f.id === id);
       if (!folder) return { ...prevState };
-      const newFolderName = `${folder.name}-copy`;
       const newFolder = {
         ...folder,
         id: crypto.randomUUID(),
-        name: newFolderName,
+        name: `${folder.name}-copy`,
       };
       const newFiles = prevState.fileTree.reduce(
         (acc, file) =>
-          file.id === id
-            ? acc
-            : [
-                ...acc,
-                { ...file, id: crypto.randomUUID(), path: newFolder.id },
-              ],
+          file.path === id
+            ? [...acc, { ...file, id: crypto.randomUUID(), path: newFolder.id }]
+            : acc,
         [] as (Path | File)[]
       );
       return {
@@ -351,7 +347,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         renameFolder,
         updateFileContent: updateSelectedFileContent,
         copyFile,
-        copyFolder,
+        copyDirectory,
         newSession,
         saveSession,
         loadSession,
