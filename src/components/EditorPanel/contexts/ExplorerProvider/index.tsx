@@ -12,6 +12,7 @@ export type File = {
   name: string;
   path: string[];
   content: string;
+  type: "file" | "folder";
 };
 
 export interface ExplorerState {
@@ -22,6 +23,7 @@ export interface ExplorerState {
 }
 
 const DEFAULT_FILE_NAME = "new-file";
+const DEFAULT_FOLDER_NAME = "new-folder";
 const DEFAULT_SESSION = "CV Lucas Prett Campagna";
 const DEFAULT_SELECTED_FILE = "main.yml";
 const DEFAULT_MAIN_FILE_CONTENT = `document:
@@ -44,10 +46,12 @@ const defaultExplorerContext = {
   currentSessionName: DEFAULT_SESSION as string,
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
-  selectFile: (_: Path) => {},
-  addFile: (_?: File["path"]) => "",
-  rmFile: (_: Path) => {},
-  renameFile: (_: Path) => {},
+  selectFile: (_: File["id"]) => {},
+  addFile: (_?: File["path"]) => "" as File["id"],
+  addDirectory: (_?: File["path"]) => "" as File["id"],
+  rmFile: (_: File["id"]) => {},
+  rmDirectory: (_: File["id"]) => {},
+  renameFile: (_: File["id"]) => {},
   updateFileContent: (_: string) => {},
   copyFile: (_: string) => {},
   newSession: (_: string) => {},
@@ -70,14 +74,15 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const newSession = (sessionName: string) => {
-    const id = crypto.randomUUID();
+    const id = crypto.randomUUID()
     const fileTree = [
       {
         id,
         name: DEFAULT_SELECTED_FILE,
         path: [],
         content: DEFAULT_MAIN_FILE_CONTENT,
-      },
+        type: "file",
+      } as File,
     ];
     setState({
       fileTree,
@@ -143,13 +148,14 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         counter++;
       }
     })();
-    const id = crypto.randomUUID();
+    const id = crypto.randomUUID()
     const newFile = {
       id,
       name: newFileName,
       path: root,
       content: "",
-    };
+      type: "file",
+    } as File;
     setState((prevState) => ({
       ...prevState,
       fileTree: [...prevState.fileTree, newFile],
@@ -158,10 +164,58 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     return id;
   };
 
+  const addDirectory = (root: File["path"] = []) => {
+    const newDirectoryName = (() => {
+      let fileName = `${DEFAULT_FOLDER_NAME}`;
+      let counter = 1;
+      while (true) {
+        const exists = fileName in state.fileTree;
+        if (!exists) return fileName;
+        fileName = `${DEFAULT_FOLDER_NAME}-${counter}`;
+        counter++;
+      }
+    })();
+    const id = crypto.randomUUID()
+    const newFile = {
+      id,
+      name: newDirectoryName,
+      path: root,
+      content: "",
+      type: "folder",
+    };
+    setState(
+      (prevState) =>
+        ({
+          ...prevState,
+          fileTree: [...prevState.fileTree, newFile],
+        } as ExplorerState)
+    );
+    return id;
+  };
+
   const rmFile = (id: string) => {
     setState((prevState) => {
       const newFileTree = prevState.fileTree.filter(
         ({ id: fileId }) => fileId !== id
+      );
+      return {
+        ...prevState,
+        fileTree: newFileTree,
+        selectedFile: newFileTree[0] || null,
+      };
+    });
+  };
+
+  const rmDirectory = (id: string) => {
+    setState((prevState) => {
+      const directoryToRemove = prevState.fileTree.find(
+        (f) => f.id === id && f.type === "folder"
+      );
+      if (!directoryToRemove) return prevState;
+      const newFileTree = prevState.fileTree.filter(
+        ({ id: fileId, path }) =>
+          fileId !== id &&
+          directoryToRemove.path.every((part, index) => part === path[index])
       );
       return {
         ...prevState,
@@ -257,7 +311,9 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         sessionNames,
         selectFile,
         addFile,
+        addDirectory,
         rmFile,
+        rmDirectory,
         renameFile,
         updateFileContent: updateSelectedFileContent,
         copyFile,

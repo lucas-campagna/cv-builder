@@ -28,21 +28,19 @@ import { useEffect } from "react";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const {
     addFile,
+    addDirectory,
     selectedFile,
     stopRenaming,
     startRenaming,
-    copyFile,
     rmFile,
   } = useExplorer();
   const rename = () => selectedFile && startRenaming(selectedFile.id);
-  const copy = () => selectedFile && copyFile(selectedFile.id);
   const rm = () => selectedFile && rmFile(selectedFile.id);
   const newFile = () => startRenaming(addFile());
+  const newDirectory = () => startRenaming(addDirectory());
   const items = [
     { label: "New file", onClick: newFile },
-    { label: "Rename", onClick: rename },
-    { label: "Copy", onClick: copy },
-    { label: "Delete", onClick: rm },
+    { label: "New directory", onClick: newDirectory },
   ];
 
   useHotkeys(
@@ -87,41 +85,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 function Tree({ root = [] }: { root?: string[] }) {
   const { fileTree } = useExplorer();
-  const files = fileTree.filter(
-    (file) =>
-      file.path.length === root.length &&
-      root.every((part, index) => part === file.path[index])
-  );
+  const files = fileTree
+    .filter(
+      (file) =>
+        file.type === "file" &&
+        file.path.length === root.length &&
+        root.every((part, index) => part === file.path[index])
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
   const folders = fileTree
-    .filter((file) => file.path.length > root.length)
-    .reduce(
-      (acc, { path, ...props }) =>
-        acc.some((prev) =>
-          prev.path.every((part, index) => part === path[index])
-        )
-          ? acc
-          : [
-              ...acc,
-              {
-                ...props,
-                path: path.slice(0, root.length + 1),
-              },
-            ],
-      [] as File[]
-    );
-  return folders
-    .map((folder, index) => (
+    .filter(
+      (file) =>
+        file.type === "folder" &&
+        file.path.length === root.length &&
+        root.every((part, index) => part === file.path[index])
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return [
+    ...folders.map((folder, index) => (
       <TreeFolder key={`folder-${index}`} folder={folder} />
-    ))
-    .concat(
-      files.map((file, index) => <TreeFile key={`file-${index}`} file={file} />)
-    );
+    )),
+    ...files.map((file, index) => (
+      <TreeFile key={`file-${index}`} file={file} />
+    )),
+  ];
 }
 
 const TreeFolder = ({ folder }: { folder: File }) => {
+  const path = [...folder.path, folder.name];
   const { addFile, startRenaming } = useExplorer();
   const items = [
-    { label: "New file", onClick: () => startRenaming(addFile(folder.path)) },
+    { label: "New file", onClick: () => startRenaming(addFile(path)) },
     { label: "Rename" },
     { label: "Copy" },
     { label: "Delete" },
@@ -135,12 +129,12 @@ const TreeFolder = ({ folder }: { folder: File }) => {
             <SidebarMenuButton>
               <ChevronRight className="transition-transform" />
               <Folder />
-              {folder.path.at(-1)}
+              {folder.name}
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub>
-              <Tree root={folder.path} />
+              <Tree root={path} />
             </SidebarMenuSub>
           </CollapsibleContent>
         </Collapsible>

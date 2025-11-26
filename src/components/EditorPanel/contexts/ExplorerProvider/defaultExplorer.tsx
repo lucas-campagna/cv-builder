@@ -15,55 +15,78 @@ const defaultExplorer: File[] = [
     name: "main.yml",
     path: [],
     content: main,
+    type: "file",
   },
   {
     id: "fa29012e-247f-4d38-aa49-45ccf5212a51",
     name: "document.yml",
     path: [],
     content: document,
+    type: "file",
   },
   {
     id: "0cc8ffcd-1640-4318-aa0b-5e3f28481bc9",
     name: "education.yml",
     path: ["components"],
     content: education,
+    type: "file",
   },
   {
     id: "3b905021-3b0a-47ed-b138-a1ed62c0a418",
     name: "headline.yml",
     path: ["components"],
     content: headline,
+    type: "file",
   },
   {
     id: "89e9215d-d92b-4626-9c59-860faa689e8e",
     name: "experience.yml",
     path: ["components"],
     content: experience,
+    type: "file",
   },
   {
     id: "91cd1b6e-01e6-464d-b47a-07031a6ec407",
     name: "li.yml",
     path: ["components", "ui"],
     content: li,
+    type: "file",
   },
   {
     id: "f9d32570-63b3-488a-ada1-238243d845bf",
     name: "row.yml",
     path: ["components", "ui"],
     content: row,
+    type: "file",
   },
   {
     id: "f332922c-a8fb-4d8a-848e-255747919b83",
     name: "section.yml",
     path: ["components", "ui"],
     content: section,
+    type: "file",
   },
   {
     id: "84ac57ea-f025-4e35-859c-5140e9033de5",
     name: "icons.yml",
     path: ["components"],
     content: icons,
+    type: "file",
   },
-]
+  {
+    id: 'bece53c3-a46c-49cf-a629-bd57fb6d3f11',
+    name: 'components',
+    path: [],
+    content: '',
+    type: 'folder',
+  },
+  {
+    id: 'd1f6f3e2-B7c1-4d3e-8f4e-2f4e4c3e4b5a',
+    name: 'ui',
+    path: ['components'],
+    content: '',
+    type: 'folder',
+  }
+];
 
 export default defaultExplorer;
