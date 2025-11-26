@@ -67,17 +67,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          <SidebarGroup>
+          {/* <SidebarGroup>
             <SidebarGroupLabel>Changes</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {/* <Tree key={index} item={item} /> */}
-                {/* {tree.map((item, index) => (
+                <Tree key={index} item={item} />
+                {tree.map((item, index) => (
                   <Tree key={index} item={item} />
-                ))} */}
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
-          </SidebarGroup>
+          </SidebarGroup> */}
         </SidebarContent>
         <SidebarRail />
       </Sidebar>
