@@ -113,13 +113,29 @@ function Tree({ root = [] }: { root?: string[] }) {
 
 const TreeFolder = ({ folder }: { folder: File }) => {
   const path = [...folder.path, folder.name];
-  const { addFile, startRenaming } = useExplorer();
+  const { addFile, startRenaming, renamingFile, renameFolder, stopRenaming } =
+    useExplorer();
   const items = [
     { label: "New file", onClick: () => startRenaming(addFile(path)) },
-    { label: "Rename" },
+    { label: "Rename", onClick: () => startRenaming(folder.id) },
     { label: "Copy" },
     { label: "Delete" },
   ];
+  const renameInputRef = React.useRef<HTMLInputElement>(null);
+  const isRenaming = renamingFile === folder.id;
+  const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      renameFolder(renameInputRef.current?.value || folder.name);
+    }
+  };
+
+  useEffect(() => {
+    if (isRenaming) {
+      setTimeout(() => {
+        renameInputRef.current?.select();
+      }, 200);
+    }
+  }, [isRenaming]);
 
   return (
     <OptionMenu items={items}>
@@ -129,7 +145,19 @@ const TreeFolder = ({ folder }: { folder: File }) => {
             <SidebarMenuButton>
               <ChevronRight className="transition-transform" />
               <Folder />
-              {folder.name}
+              {isRenaming ? (
+                <Input
+                  autoFocus
+                  ref={renameInputRef}
+                  onFocus={(e) => e.currentTarget.select()}
+                  defaultValue={folder.name}
+                  onKeyDown={handleRename}
+                  onBlur={stopRenaming}
+                  onClick={e => e.stopPropagation()}
+                />
+              ) : (
+                folder.name
+              )}
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>

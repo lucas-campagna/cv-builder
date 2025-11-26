@@ -51,9 +51,10 @@ const defaultExplorerContext = {
   addDirectory: (_?: File["path"]) => "" as File["id"],
   rmFile: (_: File["id"]) => {},
   rmDirectory: (_: File["id"]) => {},
-  renameFile: (_: File["id"]) => {},
+  renameFile: (_: File["name"]) => {},
+  renameFolder: (_: File["name"]) => {},
   updateFileContent: (_: string) => {},
-  copyFile: (_: string) => {},
+  copyFile: (_: File["id"]) => {},
   newSession: (_: string) => {},
   saveSession: () => {},
   loadSession: (_: string) => {},
@@ -74,7 +75,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const newSession = (sessionName: string) => {
-    const id = crypto.randomUUID()
+    const id = crypto.randomUUID();
     const fileTree = [
       {
         id,
@@ -148,7 +149,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         counter++;
       }
     })();
-    const id = crypto.randomUUID()
+    const id = crypto.randomUUID();
     const newFile = {
       id,
       name: newFileName,
@@ -175,7 +176,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         counter++;
       }
     })();
-    const id = crypto.randomUUID()
+    const id = crypto.randomUUID();
     const newFile = {
       id,
       name: newDirectoryName,
@@ -247,6 +248,29 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
+  const renameFolder = (name: string) => {
+    if (!state.renamingFile) return;
+    const id = state.renamingFile;
+    const folder = state.fileTree.find((file) => file.id === id);
+    if (!folder) return;
+    const oldName = folder.name;
+    setState((prevState) => ({
+      ...prevState,
+      renamingFile: null,
+      fileTree: prevState.fileTree.map((file) => {
+        if (file.id === id) {
+          file.name = name;
+        } else if (
+          folder.path.every((part, index) => part === file.path[index]) &&
+          oldName === file.path[folder.path.length]
+        ) {
+          file.path[folder.path.length] = name;
+        }
+        return file;
+      }),
+    }));
+  };
+
   const updateSelectedFileContent = (content: string) => {
     setState((prevState) => {
       if (prevState.selectedFile) {
@@ -262,7 +286,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const copyFile = (id: string) => {
+  const copyFolder = (id: File["id"]) => {
     setState((prevState) => {
       const file = prevState.fileTree.find((f) => f.id === id);
       if (!file) return { ...prevState };
@@ -315,6 +339,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         rmFile,
         rmDirectory,
         renameFile,
+        renameFolder,
         updateFileContent: updateSelectedFileContent,
         copyFile,
         newSession,
