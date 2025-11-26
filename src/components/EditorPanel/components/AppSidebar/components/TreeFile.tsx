@@ -25,6 +25,11 @@ const TreeFile = ({ file }: { file: File }) => {
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("fileId", file.id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
   const items = [
     { label: "Rename", onClick: () => startRenaming(file.id) },
     { label: "Copy", onClick: () => copyFile(file.id) },
@@ -59,7 +64,9 @@ const TreeFile = ({ file }: { file: File }) => {
             onBlur={stopRenaming}
           />
         ) : (
-          file.name
+          <span draggable onDragStart={handleDragStart}>
+            {file.name}
+          </span>
         )}
       </SidebarMenuButton>
     </OptionMenu>

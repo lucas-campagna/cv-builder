@@ -27,7 +27,9 @@ const TreeFolder = ({ folder }: { folder: Path }) => {
     addDirectory,
     copyDirectory,
     rmDirectory,
+    moveFile,
   } = useExplorer();
+  const [isDragOver, setIsDragOver] = React.useState(false);
   const items = [
     { label: "New file", onClick: () => startRenaming(addFile(path)) },
     { label: "New folder", onClick: () => startRenaming(addDirectory(path)) },
@@ -40,6 +42,34 @@ const TreeFolder = ({ folder }: { folder: Path }) => {
   const handleRename = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       renameFolder(renameInputRef.current?.value || folder.name);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.stopPropagation();
+    e.dataTransfer.setData("fileId", folder.id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    const fileId = e.dataTransfer.getData("fileId");
+    if (fileId && fileId !== folder.id) {
+      moveFile(fileId, folder.id);
     }
   };
 
@@ -56,7 +86,12 @@ const TreeFolder = ({ folder }: { folder: Path }) => {
       <SidebarMenuItem onDoubleClick={() => startRenaming(folder.id)}>
         <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton>
+            <SidebarMenuButton
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={isDragOver ? "bg-accent" : ""}
+            >
               <ChevronRight className="transition-transform" />
               <Folder />
               {isRenaming ? (
@@ -70,7 +105,9 @@ const TreeFolder = ({ folder }: { folder: Path }) => {
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                folder.name
+                <span draggable onDragStart={handleDragStart}>
+                  {folder.name}
+                </span>
               )}
             </SidebarMenuButton>
           </CollapsibleTrigger>

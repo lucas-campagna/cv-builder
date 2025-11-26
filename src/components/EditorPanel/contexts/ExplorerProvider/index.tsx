@@ -57,6 +57,7 @@ const defaultExplorerContext = {
   updateFileContent: (_: string) => {},
   copyFile: (_: File["id"]) => {},
   copyDirectory: (_: Path["id"]) => {},
+  moveFile: (_fileId: File["id"], _targetPath: Path["path"]) => {},
   newSession: (_: string) => {},
   saveSession: () => {},
   loadSession: (_: string) => {},
@@ -337,6 +338,38 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     return [...getFullPath(current.path), current.name];
   };
 
+  const moveFile = (fileId: File["id"], targetPath: Path["path"]) => {
+    setState((prevState) => {
+      // Check if moving a folder into itself or one of its descendants
+      const movingItem = prevState.fileTree.find((file) => file.id === fileId);
+      if (movingItem?.type === "folder") {
+        // Check if targetPath is the folder itself
+        if (targetPath === fileId) {
+          return prevState;
+        }
+        // Check if targetPath is a descendant of the folder being moved
+        let currentPath = targetPath;
+        while (currentPath) {
+          if (currentPath === fileId) {
+            return prevState; // Prevent moving folder into its own descendant
+          }
+          const parent = prevState.fileTree.find((f) => f.id === currentPath);
+          currentPath = parent?.path || "";
+        }
+      }
+
+      return {
+        ...prevState,
+        fileTree: prevState.fileTree.map((file) => {
+          if (file.id === fileId) {
+            return { ...file, path: targetPath };
+          }
+          return file;
+        }),
+      };
+    });
+  };
+
   useEffect(() => {
     saveSession();
   }, []);
@@ -356,6 +389,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         updateFileContent: updateSelectedFileContent,
         copyFile,
         copyDirectory,
+        moveFile,
         newSession,
         saveSession,
         loadSession,

@@ -46,10 +46,10 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <OptionMenu items={items}>
       <Sidebar {...props}>
         <SidebarContent className="flex flex-col justify-between">
-          <SidebarGroup>
+          <SidebarGroup className="h-full">
             <SidebarGroupLabel>Files</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
+            <SidebarGroupContent className="h-full">
+              <SidebarMenu className="h-full">
                 <Tree />
               </SidebarMenu>
             </SidebarGroupContent>
