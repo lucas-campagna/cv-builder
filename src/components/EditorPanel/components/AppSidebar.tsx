@@ -41,8 +41,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const items = [
     { label: "New", onClick: newFile },
     { label: "Rename", onClick: rename },
-    { label: "Copy", onclick: copy },
-    { label: "Delete", rm },
+    { label: "Copy", onClick: copy },
+    { label: "Delete", onClick: rm },
   ];
 
   useHotkeys(
