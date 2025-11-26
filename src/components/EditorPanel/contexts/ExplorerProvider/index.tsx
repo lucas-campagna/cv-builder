@@ -45,7 +45,7 @@ const defaultExplorerContext = {
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
   selectFile: (_: Path) => {},
-  addFile: () => "",
+  addFile: (_?: File["path"]) => "",
   rmFile: (_: Path) => {},
   renameFile: (_: Path) => {},
   updateFileContent: (_: string) => {},
@@ -132,7 +132,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     }));
   };
 
-  const addFile = () => {
+  const addFile = (root: File["path"] = []) => {
     const newFileName = (() => {
       let fileName = `${DEFAULT_FILE_NAME}.yml`;
       let counter = 1;
@@ -147,7 +147,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     const newFile = {
       id,
       name: newFileName,
-      path: [],
+      path: root,
       content: "",
     };
     setState((prevState) => ({

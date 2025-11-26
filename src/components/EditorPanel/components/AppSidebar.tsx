@@ -118,24 +118,36 @@ function Tree({ root = [] }: { root?: string[] }) {
     );
 }
 
-const TreeFolder = ({ folder }: { folder: File }) => (
-  <SidebarMenuItem>
-    <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
-      <CollapsibleTrigger asChild>
-        <SidebarMenuButton>
-          <ChevronRight className="transition-transform" />
-          <Folder />
-          {folder.path.at(-1)}
-        </SidebarMenuButton>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <SidebarMenuSub>
-          <Tree root={folder.path} />
-        </SidebarMenuSub>
-      </CollapsibleContent>
-    </Collapsible>
-  </SidebarMenuItem>
-);
+const TreeFolder = ({ folder }: { folder: File }) => {
+  const { addFile, startRenaming } = useExplorer();
+  const items = [
+    { label: "New", onClick: () => startRenaming(addFile(folder.path)) },
+    { label: "Rename" },
+    { label: "Copy" },
+    { label: "Delete" },
+  ];
+
+  return (
+    <OptionMenu items={items}>
+      <SidebarMenuItem>
+        <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton>
+              <ChevronRight className="transition-transform" />
+              <Folder />
+              {folder.path.at(-1)}
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <SidebarMenuSub>
+              <Tree root={folder.path} />
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </Collapsible>
+      </SidebarMenuItem>
+    </OptionMenu>
+  );
+};
 const TreeFile = ({ file }: { file: File }) => {
   const {
     selectedFile,
@@ -157,7 +169,7 @@ const TreeFile = ({ file }: { file: File }) => {
   };
 
   const items = [
-    { label: "New", onClick: () => startRenaming(addFile()) },
+    { label: "New", onClick: () => startRenaming(addFile(file.path)) },
     { label: "Rename", onClick: () => startRenaming(file.id) },
     { label: "Copy", onClick: () => copyFile(file.id) },
     { label: "Delete", onClick: () => rmFile(file.id) },
