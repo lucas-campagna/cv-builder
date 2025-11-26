@@ -39,7 +39,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const rm = () => selectedFile && rmFile(selectedFile.id);
   const newFile = () => startRenaming(addFile());
   const items = [
-    { label: "New", onClick: newFile },
+    { label: "New file", onClick: newFile },
     { label: "Rename", onClick: rename },
     { label: "Copy", onClick: copy },
     { label: "Delete", onClick: rm },
@@ -121,7 +121,7 @@ function Tree({ root = [] }: { root?: string[] }) {
 const TreeFolder = ({ folder }: { folder: File }) => {
   const { addFile, startRenaming } = useExplorer();
   const items = [
-    { label: "New", onClick: () => startRenaming(addFile(folder.path)) },
+    { label: "New file", onClick: () => startRenaming(addFile(folder.path)) },
     { label: "Rename" },
     { label: "Copy" },
     { label: "Delete" },
@@ -169,7 +169,7 @@ const TreeFile = ({ file }: { file: File }) => {
   };
 
   const items = [
-    { label: "New", onClick: () => startRenaming(addFile(file.path)) },
+    { label: "New file", onClick: () => startRenaming(addFile(file.path)) },
     { label: "Rename", onClick: () => startRenaming(file.id) },
     { label: "Copy", onClick: () => copyFile(file.id) },
     { label: "Delete", onClick: () => rmFile(file.id) },
