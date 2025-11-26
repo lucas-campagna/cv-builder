@@ -186,7 +186,7 @@ const TreeFile = ({ file }: { file: File }) => {
         onClick={() => selectFile(file.id)}
       >
         <FileIcon />
-        {renamingFile === file.id ? (
+        {isRenaming ? (
           <Input
             autoFocus
             ref={renameInputRef}
