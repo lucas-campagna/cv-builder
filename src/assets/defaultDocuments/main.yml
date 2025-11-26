@@ -31,14 +31,6 @@ experiences:
       - li: Refactored numerical calculation codes in Fortran 77 to Fortran 90 with Object Orientation principles for oil and gas applications.
       - li: Collaborated with the contracting team to update and rearchitect the codes for improved efficiency and accuracy.
 
-  - company: Federal University of Pará
-    date: 2021 - 2023
-    position: Fortran Developer
-    type: Remote
-    description:
-      - li: Refactored Fortran code for nano-magnetism and electronic structure problems using first principles.
-      - li: Collaborated with UFPA group and CNPq funding for project success.
-
   - company: Nelogica
     date: Apr 2022 - Dec 2022
     position: Delphi Developer
@@ -47,6 +39,14 @@ experiences:
       - li: Developed and maintained Delphi legacy code for stock trading and market analysis software on Windows platform.
       - li: Collaborated with team to enhance software functionality and performance.
       - li: Implemented new features and bug fixes to optimize user experience and increase efficiency.
+
+  - company: Federal University of Pará
+    date: 2021 - 2023
+    position: Fortran Developer
+    type: Remote
+    description:
+      - li: Refactored Fortran code for nano-magnetism and electronic structure problems using first principles.
+      - li: Collaborated with UFPA group and CNPq funding for project success.
 
   - company: LNCC / Petrobras
     date: 2020

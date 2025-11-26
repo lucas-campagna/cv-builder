@@ -4,10 +4,10 @@ $experiences:
     - from: row
       style_left: font-bold
       left: $company
-      right: $type
+      right: $date
     - from: row
       left: $position
-      right: $date
+      right: $type
     - from: div
       style: text-black
       body: $description
