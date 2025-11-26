@@ -17,6 +17,7 @@ export type File = Path & {
 };
 
 export interface ExplorerState {
+  isSessionInvalid: boolean;
   currentSessionName: any;
   selectedFile: (Path | File) | null;
   fileTree: (Path | File)[];
@@ -47,6 +48,7 @@ const defaultExplorerContext = {
   currentSessionName: DEFAULT_SESSION as string,
   renamingFile: "" as string | null,
   sessionNames: [] as string[],
+  isSessionInvalid: false,
   selectFile: (_: File["id"]) => {},
   addFile: (_?: File["path"]) => "" as File["id"],
   addDirectory: (_?: Path["path"]) => "" as File["id"],
@@ -72,6 +74,7 @@ export const ExplorerContext = createContext(defaultExplorerContext);
 
 const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState<ExplorerState>({
+    isSessionInvalid: defaultExplorerContext.isSessionInvalid,
     fileTree: defaultExplorerContext.fileTree,
     selectedFile: defaultExplorerContext.selectedFile,
     currentSessionName: defaultExplorerContext.currentSessionName,
@@ -85,6 +88,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         id,
         name: DEFAULT_SELECTED_FILE,
         content: DEFAULT_MAIN_FILE_CONTENT,
+        path: "",
         type: "file",
       } as File,
     ];
@@ -93,6 +97,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       selectedFile: fileTree[0],
       currentSessionName: sessionName,
       renamingFile: null,
+      isSessionInvalid: false,
     });
     localStorage.setItem(
       `explorer-session-${sessionName}`,
@@ -106,7 +111,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         `explorer-session-${state.currentSessionName}`,
         JSON.stringify(state.fileTree)
       );
-      return { ...state };
+      return { ...state, isSessionInvalid: false };
     });
   };
 
@@ -132,12 +137,13 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     const oldName = state.currentSessionName;
     localStorage.setItem(
       `explorer-session-${newName}`,
-      JSON.stringify(state.fileTree)
+      localStorage.getItem(`explorer-session-${oldName}`) || "[]"
     );
     localStorage.removeItem(`explorer-session-${oldName}`);
     setState((prevState) => ({
       ...prevState,
       currentSessionName: newName,
+      isSessionInvalid: true,
     }));
   };
 
@@ -164,6 +170,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       ...prevState,
       fileTree: [...prevState.fileTree, newFile],
       selectedFile: newFile,
+      isSessionInvalid: true,
     }));
     return id;
   };
@@ -192,6 +199,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         ({
           ...prevState,
           fileTree: [...prevState.fileTree, newFile],
+          isSessionInvalid: true,
         } as ExplorerState)
     );
     return id;
@@ -210,6 +218,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         ...prevState,
         fileTree: newFileTree,
         selectedFile: newFileTree[0] || null,
+        isSessionInvalid: true,
       };
     });
   };
@@ -227,6 +236,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         ...prevState,
         fileTree: newFileTree,
         selectedFile: newFileTree[0] || null,
+        isSessionInvalid: true,
       };
     });
   };
@@ -243,6 +253,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     const id = state.renamingFile;
     setState((prevState) => ({
       ...prevState,
+      isSessionInvalid: true,
       renamingFile: null,
       fileTree: prevState.fileTree.map((file) => {
         if (file.id === id) {
@@ -266,7 +277,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
           return file;
         });
       }
-      return { ...prevState };
+      return { ...prevState, isSessionInvalid: true };
     });
   };
 
@@ -281,6 +292,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         ...prevState,
         fileTree: [...prevState.fileTree, newFile],
         selectedFile: newFile,
+        isSessionInvalid: true,
       };
     });
   };
@@ -305,6 +317,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         ...prevState,
         fileTree: [...prevState.fileTree, newFolder, ...newFiles],
         selectedFile: newFolder,
+        isSessionInvalid: true,
       };
     });
   };
@@ -360,6 +373,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
 
       return {
         ...prevState,
+        isSessionInvalid: true,
         fileTree: prevState.fileTree.map((file) => {
           if (file.id === fileId) {
             return { ...file, path: targetPath };

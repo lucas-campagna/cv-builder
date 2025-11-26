@@ -32,24 +32,30 @@ function EditorPanel() {
     currentSessionName,
     saveSession,
     renameSession,
+    isSessionInvalid,
   } = useExplorer();
   const [newName, setNewName] = useState<string | null>(null);
 
-  function handleSave() {
-    confirm("Do you want to save the current session?") && saveSession();
-  }
   function handleOpenDocument() {
     setSessionDialogOpen(true);
   }
   function handleOpenHelp() {
     (window as any).open(HELP_PAGE_URL, "_blank");
   }
+  function handleSave() {
+    if (isSessionInvalid) {
+      saveSession();
+    }
+  }
 
-  useHotkeys({
-    "ctrl+o": handleOpenDocument,
-    "ctrl+s": handleSave,
-    "ctrl+?": handleOpenHelp,
-  });
+  useHotkeys(
+    {
+      "ctrl+o": handleOpenDocument,
+      "ctrl+s": handleSave,
+      "ctrl+?": handleOpenHelp,
+    },
+    [isSessionInvalid]
+  );
 
   const headerIcons = [
     {
@@ -57,7 +63,11 @@ function EditorPanel() {
       tooltip: "Open Document (Ctrl+O)",
       onClick: handleOpenDocument,
     },
-    { icon: Save, tooltip: "Save (Ctrl+S)", onClick: handleSave },
+    {
+      icon: Save,
+      tooltip: "Save (Ctrl+S)",
+      onClick: isSessionInvalid ? saveSession : undefined,
+    },
     {
       icon: Download,
       tooltip: "Generate PDF (Ctrl+P)",
@@ -74,11 +84,15 @@ function EditorPanel() {
     <div className="flex flex-col h-full w-full">
       <header className="bg-sidebar/90 border-b-2 h-8 py-2 px-2 flex items-center justify-between">
         <div className="flex gap-2">
-          {headerIcons.map(({ icon: Icon, tooltip, onClick }, index) => (
-            <Tooltip key={index} tooltip={tooltip}>
-              <Icon className="size-6 p-1" onClick={onClick} />
-            </Tooltip>
-          ))}
+          {headerIcons.map(({ icon: Icon, tooltip, onClick }, index) =>
+            onClick ? (
+              <Tooltip key={index} tooltip={tooltip}>
+                <Icon className="size-6 p-1" onClick={onClick} />
+              </Tooltip>
+            ) : (
+              <Icon className="size-6 p-1 opacity-50" onClick={onClick} />
+            )
+          )}
         </div>
         <div>
           {newName !== null ? (
