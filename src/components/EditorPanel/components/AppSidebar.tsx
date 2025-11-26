@@ -139,7 +139,7 @@ const TreeFolder = ({ folder }: { folder: File }) => {
 
   return (
     <OptionMenu items={items}>
-      <SidebarMenuItem>
+      <SidebarMenuItem onDoubleClick={() => startRenaming(folder.id)}>
         <Collapsible className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90">
           <CollapsibleTrigger asChild>
             <SidebarMenuButton>
@@ -153,7 +153,7 @@ const TreeFolder = ({ folder }: { folder: File }) => {
                   defaultValue={folder.name}
                   onKeyDown={handleRename}
                   onBlur={stopRenaming}
-                  onClick={e => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
                 />
               ) : (
                 folder.name
@@ -180,7 +180,6 @@ const TreeFile = ({ file }: { file: File }) => {
     renameFile,
     copyFile,
     rmFile,
-    addFile,
   } = useExplorer();
   const renameInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -191,7 +190,6 @@ const TreeFile = ({ file }: { file: File }) => {
   };
 
   const items = [
-    { label: "New file", onClick: () => startRenaming(addFile(file.path)) },
     { label: "Rename", onClick: () => startRenaming(file.id) },
     { label: "Copy", onClick: () => copyFile(file.id) },
     { label: "Delete", onClick: () => rmFile(file.id) },
@@ -212,6 +210,7 @@ const TreeFile = ({ file }: { file: File }) => {
         isActive={!!selectedFile && file.id === selectedFile.id}
         className="data-[active=true]:bg-transparent"
         onClick={() => selectFile(file.id)}
+        onDoubleClick={() => startRenaming(file.id)}
       >
         <FileIcon />
         {isRenaming ? (
