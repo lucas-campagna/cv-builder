@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { AppSidebar } from "./components/AppSidebar";
+import AppSidebar from "./components/AppSidebar";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
