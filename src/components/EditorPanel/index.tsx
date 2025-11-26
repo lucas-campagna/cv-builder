@@ -157,7 +157,7 @@ function EditorPanel() {
               />
             </div>
           </header>
-          <Editor />,
+          <Editor />
         </SidebarInset>
       </SidebarProvider>
       {sessionDialogOpen && (
