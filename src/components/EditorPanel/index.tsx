@@ -1,12 +1,5 @@
+import { memo, useState } from "react";
 import { AppSidebar } from "./components/AppSidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -29,8 +22,7 @@ import { Input } from "../ui/input";
 import useHotkeys from "@/hooks/useHotkeys";
 import { HELP_PAGE_URL } from "@/constants";
 import SessionsDialog from "./components/SessionsDialog";
-import { useState } from "react";
-import { type File } from "./contexts/ExplorerProvider";
+import Header from "./components/Header";
 
 function EditorPanel() {
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
@@ -169,23 +161,6 @@ function EditorPanel() {
     </div>
   );
 }
-
-const Header = ({ path }: { path: File["path"] }) => (
-  <Breadcrumb className="select-none">
-    <BreadcrumbList>
-      {path.map((part, index, arr) => (
-        <BreadcrumbItem key={index}>
-          {index < arr.length - 1 ? (
-            <BreadcrumbLink>{part}</BreadcrumbLink>
-          ) : (
-            <BreadcrumbPage>{part}</BreadcrumbPage>
-          )}
-          {index < arr.length - 1 && <BreadcrumbSeparator />}
-        </BreadcrumbItem>
-      ))}
-    </BreadcrumbList>
-  </Breadcrumb>
-);
 
 export default ({ ...props }: any) => (
   <ExplorerProvider>
