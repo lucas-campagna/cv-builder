@@ -138,7 +138,7 @@ function EditorPanel() {
           </Tooltip>
         </div>
       </header>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <AppSidebar className="mt-8 h-[calc(100%-8)]" />
         <SidebarInset>
           <header className="flex justify-between items-center border-b px-4 h-10">
