@@ -162,8 +162,8 @@ function EditorPanel() {
   );
 }
 
-export default ({ ...props }: any) => (
+export default memo(({ ...props }: any) => (
   <ExplorerProvider>
     <EditorPanel {...props} />
   </ExplorerProvider>
-);
+));
