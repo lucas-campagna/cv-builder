@@ -16,7 +16,8 @@ const Editor = () => {
   if (showDiff) {
     return (
       <DiffEditor
-        height="100vh"
+      // TODO: Fix width issue
+        width="99%"
         theme="light"
         language={language}
         options={{
@@ -30,15 +31,14 @@ const Editor = () => {
   }
 
   return (
-    <div className="h-full w-full m-0 text-[16px]">
-      <MonacoEditor
-        height="100vh"
-        theme="light"
-        language={language}
-        onChange={(txt: string | undefined) => txt && updateFileContent(txt)}
-        value={code}
-      />
-    </div>
+    <MonacoEditor
+      // TODO: Fix width issue
+      width="99%"
+      theme="light"
+      language={language}
+      onChange={(txt: string | undefined) => txt && updateFileContent(txt)}
+      value={code}
+    />
   );
 };
 
