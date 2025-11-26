@@ -197,6 +197,10 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const rmFile = (id: File["id"]) => {
+    const confirmed = confirm(
+      "This action can not be undone. Are you sure you want to delete this file?"
+    );
+    if (!confirmed) return;
     setState((prevState) => {
       const newFileTree = prevState.fileTree.filter(
         ({ id: fileId }) => fileId !== id
@@ -210,6 +214,10 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const rmDirectory = (id: Path["id"]) => {
+    const confirmed = confirm(
+      "This action can not be undone. Are you sure you want to delete this folder and all its contents?"
+    );
+    if (!confirmed) return;
     setState((prevState) => {
       const newFileTree = prevState.fileTree.filter(
         ({ id: folderId, path }) => folderId !== id && path !== id
