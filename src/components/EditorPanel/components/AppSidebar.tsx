@@ -103,10 +103,17 @@ function Tree({ root = "" }: { root?: Path["path"] }) {
 
 const TreeFolder = ({ folder }: { folder: Path }) => {
   const path = folder.id;
-  const { addFile, startRenaming, renamingFile, renameFolder, stopRenaming } =
-    useExplorer();
+  const {
+    addFile,
+    startRenaming,
+    renamingFile,
+    renameFolder,
+    stopRenaming,
+    addDirectory,
+  } = useExplorer();
   const items = [
     { label: "New file", onClick: () => startRenaming(addFile(path)) },
+    { label: "New folder", onClick: () => startRenaming(addDirectory(path)) },
     { label: "Rename", onClick: () => startRenaming(folder.id) },
     { label: "Copy" },
     { label: "Delete" },
