@@ -6,18 +6,18 @@ $headline:
     - from: div
       style: flex gap-2 text-xs pt-1
       body:
-      - a:
-        - email_icon
-        - $email
-        href: mailto:$email
-        target: _blank
-      - a: 
-        - github_icon
-        - $github
-        href: https://github.com/$github
-        target: _blank
-      - a: 
-        - linkedin_icon
-        - $linkedin
-        href: https://linkedin.com/in/$linkedin
-        target: _blank
+        - a:
+            - email_icon
+            - $email
+          href: mailto:$email
+          target: _blank
+        - a:
+            - github_icon
+            - $github
+          href: https://github.com/$github
+          target: _blank
+        - a:
+            - linkedin_icon
+            - $linkedin
+          href: https://linkedin.com/in/$linkedin
+          target: _blank
