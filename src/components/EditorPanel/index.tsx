@@ -90,8 +90,12 @@ function EditorPanel() {
                 <Icon className="size-6 p-1" onClick={onClick} />
               </Tooltip>
             ) : (
-              <Icon className="size-6 p-1 opacity-50" onClick={onClick} />
-            )
+              <Icon
+                key={index}
+                className="size-6 p-1 opacity-50"
+                onClick={onClick}
+              />
+            ),
           )}
         </div>
         <div>
