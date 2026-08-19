@@ -1,4 +1,5 @@
 import { createContext, useEffect, useMemo, useState } from "react";
+import Sheet from "@lprett/gsheetdb";
 import defaultExplorer from "./defaultExplorer";
 
 export interface FileNode {
@@ -73,6 +74,15 @@ const defaultExplorerContext = {
 export const ExplorerContext = createContext(defaultExplorerContext);
 
 const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
+  const [gsheet, setGsheet] = useState<Sheet | null>(null);
+  const [isOffline, setIsOffline] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isOffline) {
+      console.warn("Google Sheets unavailable. Using localStorage as fallback.");
+    }
+  }, [isOffline]);
+  const [sessionNamesList, setSessionNamesList] = useState<string[]>([]);
   const [state, setState] = useState<ExplorerState>({
     isSessionInvalid: defaultExplorerContext.isSessionInvalid,
     fileTree: defaultExplorerContext.fileTree,
@@ -80,6 +90,72 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     currentSessionName: defaultExplorerContext.currentSessionName,
     renamingFile: defaultExplorerContext.renamingFile,
   });
+
+  useEffect(() => {
+    const deploymentId = localStorage.getItem("gsheet_deployment_id");
+    if (!deploymentId) {
+      return;
+    }
+    try {
+      const sheet = new Sheet({ deploymentId });
+      setGsheet(sheet);
+      getSessionNamesFromGsheet().then((names) => {
+        if (names.length > 0) {
+          setSessionNamesList(names);
+        }
+      });
+    } catch {
+      setIsOffline(true);
+    }
+  }, []);
+
+  const saveToGsheet = async (sessionName: string, fileTree: (Path | File)[]) => {
+    if (!gsheet) return;
+    try {
+      await gsheet.set("sessions", fileTree.map((file) => ({
+        ...file,
+        session_name: sessionName,
+      })));
+    } catch {
+      setIsOffline(true);
+    }
+  };
+
+  const loadFromGsheet = async (sessionName: string): Promise<File[] | null> => {
+    if (!gsheet) return null;
+    try {
+      const data = await gsheet.get("sessions", { session_name: sessionName }) as unknown as File[];
+      return data;
+    } catch {
+      setIsOffline(true);
+      return null;
+    }
+  };
+
+  const getSessionNamesFromGsheet = async (): Promise<string[]> => {
+    if (!gsheet) return [];
+    try {
+      const data = await gsheet.get("sessions") as unknown as { session_name: string }[];
+      const names = [...new Set(data.map((r) => r.session_name))];
+      return names;
+    } catch {
+      setIsOffline(true);
+      return [];
+    }
+  };
+
+  const deleteFromGsheet = async (sessionName: string) => {
+    if (!gsheet) return;
+    try {
+      const data = await gsheet.get("sessions", { session_name: sessionName }) as unknown as { id: string }[];
+      const ids = data.map((r) => r.id);
+      if (ids.length > 0) {
+        await gsheet.rm("sessions", ids);
+      }
+    } catch {
+      setIsOffline(true);
+    }
+  };
 
   const newSession = (sessionName: string) => {
     const id = crypto.randomUUID();
@@ -103,6 +179,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       `explorer-session-${sessionName}`,
       JSON.stringify(fileTree)
     );
+    saveToGsheet(sessionName, fileTree);
   };
 
   const saveSession = () => {
@@ -111,11 +188,23 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
         `explorer-session-${state.currentSessionName}`,
         JSON.stringify(state.fileTree)
       );
+      saveToGsheet(state.currentSessionName, state.fileTree);
       return { ...state, isSessionInvalid: false };
     });
   };
 
-  const loadSession = (sessionName: string) => {
+  const loadSession = async (sessionName: string) => {
+    const gsheetData = await loadFromGsheet(sessionName);
+    if (gsheetData && gsheetData.length > 0) {
+      const fileTree = gsheetData;
+      setState((prevState) => ({
+        ...prevState,
+        fileTree,
+        selectedFile: fileTree[0] || null,
+        currentSessionName: sessionName,
+      }));
+      return;
+    }
     const sessionData = localStorage.getItem(`explorer-session-${sessionName}`);
     if (sessionData) {
       const fileTree = JSON.parse(sessionData) as File[];
@@ -128,18 +217,37 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const deleteSession = (sessionName: string) => {
+  const deleteSession = async (sessionName: string) => {
     localStorage.removeItem(`explorer-session-${sessionName}`);
+    await deleteFromGsheet(sessionName);
     setState((s) => ({ ...s }));
   };
 
-  const renameSession = (newName: string) => {
+  const renameSession = async (newName: string) => {
     const oldName = state.currentSessionName;
+    const oldData = localStorage.getItem(`explorer-session-${oldName}`);
     localStorage.setItem(
       `explorer-session-${newName}`,
-      localStorage.getItem(`explorer-session-${oldName}`) || "[]"
+      oldData || "[]"
     );
     localStorage.removeItem(`explorer-session-${oldName}`);
+    
+    const gsheetData = await loadFromGsheet(oldName);
+    if (gsheetData && gsheetData.length > 0) {
+      const newData = gsheetData.map((file: File) => ({
+        ...file,
+        session_name: newName,
+      }));
+      await deleteFromGsheet(oldName);
+      try {
+        if (gsheet) {
+          await gsheet.set("sessions", newData);
+        }
+      } catch {
+        setIsOffline(true);
+      }
+    }
+    
     setState((prevState) => ({
       ...prevState,
       currentSessionName: newName,
@@ -323,6 +431,9 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const sessionNames = useMemo(() => {
+    if (sessionNamesList.length > 0) {
+      return sessionNamesList;
+    }
     const sessions: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -334,7 +445,7 @@ const ExplorerProvider = ({ children }: { children: React.ReactNode }) => {
       sessions.push(DEFAULT_SESSION);
     }
     return sessions;
-  }, [state]);
+  }, [state, sessionNamesList]);
 
   const startRenaming = (id: string) => {
     setState((prevState) => ({

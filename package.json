@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@focus-reactive/react-yaml": "^1.1.2",
+    "@lprett/gsheetdb": "^1.2.7",
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-collapsible": "^1.1.12",

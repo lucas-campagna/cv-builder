@@ -11,6 +11,7 @@ import Editor from "./components/Editor";
 import { useExplorer } from "./hooks/useExplorer";
 import {
   Download,
+  Globe,
   LibraryBig,
   MessageCircleQuestionMark,
   Save,
@@ -23,9 +24,11 @@ import useHotkeys from "@/hooks/useHotkeys";
 import { HELP_PAGE_URL } from "@/constants";
 import SessionsDialog from "./components/SessionsDialog";
 import Header from "./components/Header";
+import GSheetSetupDialog from "@/components/GSheetSetupDialog";
 
 function EditorPanel() {
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
+  const [setupDialogOpen, setSetupDialogOpen] = useState(false);
   const { toggleOnePage, onePage, fontSize, setFontSize } = useAppState();
   const {
     selectedFile: selectedFile,
@@ -54,7 +57,7 @@ function EditorPanel() {
       "ctrl+s": handleSave,
       "ctrl+?": handleOpenHelp,
     },
-    [isSessionInvalid]
+    [isSessionInvalid],
   );
 
   const headerIcons = [
@@ -77,6 +80,11 @@ function EditorPanel() {
       icon: MessageCircleQuestionMark,
       tooltip: "Help (Ctrl+?)",
       onClick: handleOpenHelp,
+    },
+    {
+      icon: Globe,
+      tooltip: "Connect Google Sheets",
+      onClick: () => setSetupDialogOpen(true),
     },
   ];
 
@@ -172,6 +180,10 @@ function EditorPanel() {
           onOpenChange={setSessionDialogOpen}
         />
       )}
+      <GSheetSetupDialog
+        open={setupDialogOpen}
+        onOpenChange={setSetupDialogOpen}
+      />
     </div>
   );
 }
